@@ -1,0 +1,349 @@
+```html
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAYTAKE - Digital Payment & Merchant Wallet</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#1d4ed8',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 text-slate-800">
+
+  <!-- Mobile App Frame Container -->
+  <div class="w-full max-w-md h-screen sm:h-[840px] bg-slate-50 sm:rounded-[32px] shadow-2xl flex flex-direction flex-col overflow-hidden relative border-0 sm:border-8 border-slate-800">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-brand-600 text-white px-5 py-4 flex items-center justify-between shadow-md relative z-20">
+      <!-- Hamburger Menu Button -->
+      <button onclick="toggleSideMenu()" class="text-xl p-1 hover:bg-brand-700 rounded-lg transition active:scale-95" title="Menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <!-- App Title -->
+      <h1 class="font-extrabold text-xl tracking-wider uppercase font-mono text-white">PAYTAKE</h1>
+
+      <!-- Profile Button -->
+      <div class="relative">
+        <button onclick="toggleProfileDropdown()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 border border-white/40 flex items-center justify-center transition active:scale-95" title="Profile">
+          <i class="fa-solid fa-user text-lg text-white"></i>
+        </button>
+
+        <!-- Profile Dropdown Popup (From Wireframe Notes) -->
+        <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-3 px-4 z-50 text-slate-800 transition-all transform origin-top-right">
+          <div class="flex items-center space-x-3 pb-3 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-lg">
+              <i class="fa-solid fa-mobile-screen"></i>
+            </div>
+            <div class="overflow-hidden">
+              <p class="text-xs text-slate-400 font-medium">Phone number</p>
+              <p id="profilePhoneDisplay" class="font-bold text-sm text-slate-800 truncate">+250 788 000 000</p>
+            </div>
+          </div>
+
+          <!-- Balance snippet -->
+          <div class="py-3 border-b border-slate-100 flex justify-between items-center">
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Balance</p>
+              <p id="profileBalanceDisplay" class="text-base font-extrabold text-accent-600">150,000 RWF</p>
+            </div>
+            <span class="bg-accent-50 text-accent-600 text-[10px] font-semibold px-2 py-1 rounded-full">Active</span>
+          </div>
+
+          <!-- Actions list -->
+          <div class="pt-2 space-y-1">
+            <button onclick="openModal('changePasswordModal'); toggleProfileDropdown();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 rounded-xl flex items-center space-x-2 transition">
+              <i class="fa-solid fa-key text-slate-400 w-4"></i>
+              <span>Change password</span>
+            </button>
+            <button onclick="openModal('withdrawalRecordModal'); toggleProfileDropdown();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 rounded-xl flex items-center space-x-2 transition">
+              <i class="fa-solid fa-clock-rotate-left text-slate-400 w-4"></i>
+              <span>Withdrawal record</span>
+            </button>
+            <button onclick="switchView('authView')" class="w-full text-left px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl flex items-center space-x-2 transition mt-1">
+              <i class="fa-solid fa-right-from-bracket text-rose-400 w-4"></i>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- App Main Content Area -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar relative">
+
+      <!-- Notification Toast -->
+      <div id="toast" class="hidden absolute top-4 left-4 right-4 bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg z-50 flex items-center justify-between border border-slate-700 animate-bounce">
+        <span id="toastMessage">Action successful!</span>
+        <button onclick="closeToast()" class="text-slate-400 hover:text-white ml-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- VIEW 1: AUTHENTICATION SCREEN (DEFAULT FROM SKETCH) -->
+      <section id="authView" class="p-6 flex flex-col justify-between min-h-full">
+        <div>
+          <!-- Header Hero -->
+          <div class="text-center my-6">
+            <div class="w-16 h-16 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+              <i class="fa-solid fa-wallet text-3xl"></i>
+            </div>
+            <h2 id="authTitle" class="text-2xl font-extrabold text-slate-900">Register now!</h2>
+            <p id="authSubtitle" class="text-xs text-slate-500 mt-1">Create your PAYTAKE business account in seconds</p>
+          </div>
+
+          <!-- Register Form -->
+          <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+            <!-- Registration Full Name Field (Optional toggle) -->
+            <div id="nameFieldGroup" class="space-y-1">
+              <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Business Name</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                  <i class="fa-solid fa-store text-sm"></i>
+                </span>
+                <input type="text" id="nameInput" placeholder="Enter business name" class="w-full pl-10 pr-4 py-3 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition font-medium">
+              </div>
+            </div>
+
+            <!-- Phone Number Field -->
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Phone number :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                  <i class="fa-solid fa-phone text-sm"></i>
+                </span>
+                <input type="tel" id="phoneInput" required placeholder="0788 123 456" class="w-full pl-10 pr-4 py-3 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition font-medium">
+              </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Password :</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                  <i class="fa-solid fa-lock text-sm"></i>
+                </span>
+                <input type="password" id="passwordInput" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition font-medium">
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button type="submit" id="authBtn" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-brand-500/20 active:scale-[0.98] transition duration-200 flex items-center justify-center space-x-2 mt-6">
+              <span id="authBtnText">Register</span>
+              <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+          </form>
+
+          <!-- Toggle Auth Mode (Sign in vs Register) -->
+          <div class="text-center mt-6">
+            <p class="text-sm text-slate-600">
+              <span id="authToggleQuestion">Already signed ?</span>
+              <button onclick="toggleAuthMode()" id="authToggleLink" class="font-bold text-brand-600 hover:underline ml-1">Sign in</button>
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Demo Bypass -->
+        <div class="mt-8 pt-4 border-t border-slate-200/80 text-center">
+          <p class="text-[11px] text-slate-400">Want to test the active wallet dashboard?</p>
+          <button onclick="quickLoginDemo()" class="mt-1 text-xs font-bold text-slate-700 bg-slate-200/60 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
+            <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Preview Dashboard
+          </button>
+        </div>
+      </section>
+
+      <!-- VIEW 2: DASHBOARD SCREEN (ACTIVE MERCHANT VIEW) -->
+      <section id="dashboardView" class="hidden p-5 space-y-5">
+        <!-- Balance Card -->
+        <div class="bg-gradient-to-br from-brand-600 via-brand-700 to-slate-900 text-white p-5 rounded-2xl shadow-xl relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <span class="text-xs font-semibold text-brand-100 uppercase tracking-wider">Total Available Balance</span>
+              <div class="flex items-center space-x-2 mt-1">
+                <span id="dashBalanceDisplay" class="text-3xl font-extrabold tracking-tight">150,000 RWF</span>
+                <button onclick="toggleBalanceVisibility()" class="text-brand-200 hover:text-white transition"><i id="eyeIcon" class="fa-solid fa-eye text-sm"></i></button>
+              </div>
+            </div>
+            <span class="bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-wider">Merchant</span>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs text-brand-100">
+            <span>Account: <strong id="dashPhoneDisplay" class="text-white">+250 788 123 456</strong></span>
+            <span class="text-emerald-300 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i> Verified</span>
+          </div>
+        </div>
+
+        <!-- Quick Action Grid -->
+        <div>
+          <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">Quick Business Actions</h3>
+          <div class="grid grid-cols-4 gap-3">
+            <button onclick="openModal('withdrawModal')" class="flex flex-col items-center p-3 bg-white hover:bg-brand-50/50 border border-slate-200/80 rounded-2xl shadow-sm transition active:scale-95 group">
+              <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                <i class="fa-solid fa-hand-holding-dollar text-lg"></i>
+              </div>
+              <span class="text-xs font-bold text-slate-700">Withdraw</span>
+            </button>
+
+            <button onclick="openModal('airtimeModal')" class="flex flex-col items-center p-3 bg-white hover:bg-brand-50/50 border border-slate-200/80 rounded-2xl shadow-sm transition active:scale-95 group">
+              <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                <i class="fa-solid fa-mobile-retro text-lg"></i>
+              </div>
+              <span class="text-xs font-bold text-slate-700">Airtime</span>
+            </button>
+
+            <button onclick="openModal('transferModal')" class="flex flex-col items-center p-3 bg-white hover:bg-brand-50/50 border border-slate-200/80 rounded-2xl shadow-sm transition active:scale-95 group">
+              <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                <i class="fa-solid fa-paper-plane text-lg"></i>
+              </div>
+              <span class="text-xs font-bold text-slate-700">Send P2P</span>
+            </button>
+
+            <button onclick="openModal('withdrawalRecordModal')" class="flex flex-col items-center p-3 bg-white hover:bg-brand-50/50 border border-slate-200/80 rounded-2xl shadow-sm transition active:scale-95 group">
+              <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                <i class="fa-solid fa-receipt text-lg"></i>
+              </div>
+              <span class="text-xs font-bold text-slate-700">Records</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-bold text-slate-800">Recent Transactions</h3>
+            <button onclick="openModal('withdrawalRecordModal')" class="text-xs font-bold text-brand-600 hover:underline">See All</button>
+          </div>
+
+          <div id="recentTransactionsList" class="space-y-3">
+            <!-- Dynamic Content loaded via JS -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Side Navigation Menu (Drawer Overlay) -->
+    <div id="sideMenuOverlay" onclick="toggleSideMenu()" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 transition-opacity"></div>
+    <div id="sideMenu" class="fixed top-0 bottom-0 left-0 w-64 bg-slate-900 text-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out p-5 flex flex-col justify-between">
+      <div>
+        <div class="flex justify-between items-center pb-5 border-b border-slate-800">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center font-bold text-white">P</div>
+            <span class="font-extrabold text-lg tracking-wider">PAYTAKE</span>
+          </div>
+          <button onclick="toggleSideMenu()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <nav class="mt-6 space-y-2">
+          <button onclick="switchView('dashboardView'); toggleSideMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition">
+            <i class="fa-solid fa-chart-pie w-5 text-brand-500"></i>
+            <span>Dashboard</span>
+          </button>
+          <button onclick="openModal('withdrawModal'); toggleSideMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition">
+            <i class="fa-solid fa-money-bill-transfer w-5 text-emerald-500"></i>
+            <span>Withdraw Cash</span>
+          </button>
+          <button onclick="openModal('withdrawalRecordModal'); toggleSideMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition">
+            <i class="fa-solid fa-clock-rotate-left w-5 text-amber-500"></i>
+            <span>Withdrawal History</span>
+          </button>
+          <button onclick="openModal('changePasswordModal'); toggleSideMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition">
+            <i class="fa-solid fa-lock w-5 text-blue-500"></i>
+            <span>Security & Password</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800">
+        <p class="text-[11px] text-slate-500">PAYTAKE Merchant v2.1</p>
+        <p class="text-[10px] text-slate-600">Rwanda Digital Financials</p>
+      </div>
+    </div>
+
+    <!-- MODALS SECTION -->
+
+    <!-- Modal 1: Withdraw Funds -->
+    <div id="withdrawModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl animate-fade-in">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+          <h3 class="font-bold text-slate-900 text-base">Withdraw to Mobile Money</h3>
+          <button onclick="closeModal('withdrawModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <form onsubmit="handleWithdraw(event)" class="space-y-3">
+          <div>
+            <label class="text-xs font-bold text-slate-600">Select Provider</label>
+            <select id="withdrawProvider" class="w-full p-3 mt-1 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
+              <option value="MTN Mobile Money">MTN Mobile Money (MoMo)</option>
+              <option value="Airtel Money">Airtel Money</option>
+              <option value="Bank Transfer">Bank Account</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-slate-600">Recipient Phone Number</label>
+            <input type="tel" id="withdrawPhone" required placeholder="0788..." class="w-full p-3 mt-1 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-slate-600">Amount (RWF)</label>
+            <input type="number" id="withdrawAmount" required min="500" placeholder="e.g. 10000" class="w-full p-3 mt-1 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
+          </div>
+
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-500/20 transition mt-2">
+            Confirm Withdrawal
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 2: Change Password -->
+    <div id="changePasswordModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+          <h3 class="font-bold text-slate-900 text-base">Change Password</h3>
+          <button onclick="closeModal('changePasswordModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <form onsubmit="handleChangePassword(event)" class="space-y-3">
