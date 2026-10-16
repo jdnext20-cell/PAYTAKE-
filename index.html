@@ -8,25 +8,36 @@
         body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         .header { background: #1976d2; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; font-weight: bold; margin: -20px -20px 20px -20px; }
-        .balance-box { background: #0d47a1; color: white; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        .balance-box { background: #0d47a1; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
         .balance-amount { font-size: 28px; font-weight: bold; margin-top: 5px; }
         .record-item { display: flex; justify-content: space-between; padding: 10px; background: #eef2f5; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
+        input { width: 100%; padding: 10px; margin: 8px 0 12px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #1976d2; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <div class="header">PAYTAKE Mobile App 📱</div>
-    <p style="font-size: 14px;">Konti: <strong id="accNo">0781234567</strong></p>
     
-    <div class="balance-box">
-        <div style="font-size: 12px; opacity: 0.8;">AVAILABLE BALANCE</div>
-        <div class="balance-amount" id="clientBalance">0 RWF</div>
-    </div>
+    <label style="font-size: 13px; font-weight: bold;">Andika Nimero yawe ya Konti:</label>
+    <input type="text" id="phoneInput" placeholder="Urugero: 078XXXXXXX">
+    <button id="checkBtn">Shakisha Konti</button>
 
-    <h4 style="margin-bottom: 10px;">Amateka y'Ibyakozwe (Live Records):</h4>
-    <div id="recordsList">
-        <p style="color: #777; font-size: 12px;">Nta makuru aragera kuri konti...</p>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+    <div id="accountDisplay" style="display: none;">
+        <p style="font-size: 14px;">Konti: <strong id="accNo">-</strong></p>
+        
+        <div class="balance-box">
+            <div style="font-size: 12px; opacity: 0.8;">AVAILABLE BALANCE</div>
+            <div class="balance-amount" id="clientBalance">0 RWF</div>
+        </div>
+
+        <h4 style="margin-bottom: 10px;">Amateka y'Ibyakozwe (Live Records):</h4>
+        <div id="recordsList">
+            <p style="color: #777; font-size: 12px;">Nta amakuru aragera kuri konti...</p>
+        </div>
     </div>
 </div>
 
@@ -47,21 +58,40 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const clientPhone = "0781234567";
-    
-    onSnapshot(doc(db, "accounts", clientPhone), (docSnap) => {
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            document.getElementById("clientBalance").innerText = (data.balance || 0).toLocaleString() + " RWF";
-            
-            if (data.history && data.history.length > 0) {
-                let html = "";
-                [...data.history].reverse().forEach(rec => {
-                    html += `<div class="record-item"><span style="color:green; font-weight:bold;">+${rec.amount.toLocaleString()} RWF</span><span style="color:#666;">${rec.time}</span></div>`;
-                });
-                document.getElementById("recordsList").innerHTML = html;
-            }
+    let unsubscribe = null;
+
+    document.getElementById("checkBtn").addEventListener("click", () => {
+        const phone = document.getElementById("phoneInput").value.trim();
+        if (!phone) {
+            alert("Nyamuneka andika nimero yawe neza!");
+            return;
         }
+
+        document.getElementById("accNo").innerText = phone;
+        document.getElementById("accountDisplay").style.display = "block";
+
+        if (unsubscribe) unsubscribe(); // Ohoza listen mbere
+
+        // Listen to Firestore real-time for this specific phone number
+        unsubscribe = onSnapshot(doc(db, "accounts", phone), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById("clientBalance").innerText = (data.balance || 0).toLocaleString() + " RWF";
+                
+                if (data.history && data.history.length > 0) {
+                    let html = "";
+                    [...data.history].reverse().forEach(rec => {
+                        html += `<div class="record-item"><span style="color:green; font-weight:bold;">+${rec.amount.toLocaleString()} RWF</span><span style="color:#666;">${rec.time}</span></div>`;
+                    });
+                    document.getElementById("recordsList").innerHTML = html;
+                } else {
+                    document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">Nta amakuru aragera kuri konti...</p>';
+                }
+            } else {
+                document.getElementById("clientBalance").innerText = "0 RWF";
+                document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">Iyi konti ntaragira amafaranga yakira.</p>';
+            }
+        });
     });
 </script>
 
