@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="rw">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,47 +27,47 @@
     
     <!-- Navigation Tabs -->
     <div id="authTabs" class="tabs">
-        <span id="loginTab" class="tab active">Kwinjira (Login)</span>
-        <span id="regTab" class="tab">Kwiyandikisha (Register)</span>
+        <span id="loginTab" class="tab active">Login</span>
+        <span id="regTab" class="tab">Register</span>
     </div>
 
     <!-- Login Form -->
     <div id="loginForm">
-        <label style="font-size: 13px; font-weight: bold;">Nimero ya Telefone:</label>
-        <input type="text" id="loginPhone" placeholder="078XXXXXXX">
+        <label style="font-size: 13px; font-weight: bold;">Phone Number:</label>
+        <input type="text" id="loginPhone" placeholder="e.g. 078XXXXXXX">
 
-        <label style="font-size: 13px; font-weight: bold;">PIN Code (Imibare 4):</label>
+        <label style="font-size: 13px; font-weight: bold;">PIN Code (4 digits):</label>
         <input type="password" id="loginPin" maxlength="4" placeholder="****">
 
-        <button id="loginBtn">Kwinjira mu Konti</button>
+        <button id="loginBtn">Sign In</button>
     </div>
 
     <!-- Register Form -->
     <div id="registerForm" style="display: none;">
-        <label style="font-size: 13px; font-weight: bold;">Nimero nshya ya Telefone:</label>
-        <input type="text" id="regPhone" placeholder="078XXXXXXX">
+        <label style="font-size: 13px; font-weight: bold;">New Phone Number:</label>
+        <input type="text" id="regPhone" placeholder="e.g. 078XXXXXXX">
 
-        <label style="font-size: 13px; font-weight: bold;">Hitamo PIN Code (Imibare 4):</label>
+        <label style="font-size: 13px; font-weight: bold;">Create 4-digit PIN:</label>
         <input type="password" id="regPin" maxlength="4" placeholder="****">
 
-        <button id="registerBtn" class="btn-register">Kurema Konti Nshya</button>
+        <button id="registerBtn" class="btn-register">Create Account</button>
     </div>
 
     <!-- Dashboard Screen -->
     <div id="accountDisplay" style="display: none;">
-        <p style="font-size: 14px;">Konti: <strong id="accNo">-</strong></p>
+        <p style="font-size: 14px;">Account: <strong id="accNo">-</strong></p>
         
         <div class="balance-box">
             <div style="font-size: 12px; opacity: 0.8;">AVAILABLE BALANCE</div>
             <div class="balance-amount" id="clientBalance">0 RWF</div>
         </div>
 
-        <h4 style="margin-bottom: 10px;">Amateka y'Ibyakozwe (Live Records):</h4>
+        <h4 style="margin-bottom: 10px;">Transaction History:</h4>
         <div id="recordsList">
-            <p style="color: #777; font-size: 12px;">Nta amakuru aragera kuri konti...</p>
+            <p style="color: #777; font-size: 12px;">No activity yet...</p>
         </div>
 
-        <button class="logout-btn" id="logoutBtn">Sohoka (Logout)</button>
+        <button class="logout-btn" id="logoutBtn">Log Out</button>
     </div>
 </div>
 
@@ -90,7 +90,6 @@
 
     let unsubscribe = null;
 
-    // Toggle Tab Logic
     const loginTab = document.getElementById("loginTab");
     const regTab = document.getElementById("regTab");
     const loginForm = document.getElementById("loginForm");
@@ -110,13 +109,13 @@
         loginForm.style.display = "none";
     });
 
-    // Registration Action
+    // Registration Logic
     document.getElementById("registerBtn").addEventListener("click", async () => {
         const phone = document.getElementById("regPhone").value.trim();
         const pin = document.getElementById("regPin").value.trim();
 
         if (!phone || pin.length !== 4) {
-            alert("Andika nimero ya telefone hamwe na PIN y'imibare 4 neza!");
+            alert("Please enter a valid phone number and a 4-digit PIN!");
             return;
         }
 
@@ -124,26 +123,26 @@
         const docSnap = await getDoc(userRef);
 
         if (docSnap.exists()) {
-            alert("Iyi nimero irasanzwe ifite konti! Koresha paje ya Login.");
+            alert("This phone number is already registered. Please sign in.");
         } else {
             await setDoc(userRef, {
                 pin: pin,
                 balance: 0,
                 history: []
             });
-            alert("Konti yawe yaremwe neza! Ubu ushobora kwinjira (Login).");
+            alert("Account created successfully! You can now log in.");
             loginTab.click();
             document.getElementById("loginPhone").value = phone;
         }
     });
 
-    // Login Action
+    // Login Logic
     document.getElementById("loginBtn").addEventListener("click", async () => {
         const phone = document.getElementById("loginPhone").value.trim();
         const pin = document.getElementById("loginPin").value.trim();
 
         if (!phone || !pin) {
-            alert("Andika nimero n'umubare w'ibanga (PIN) neza.");
+            alert("Please enter both phone number and PIN.");
             return;
         }
 
@@ -159,7 +158,7 @@
                 registerForm.style.display = "none";
                 document.getElementById("accountDisplay").style.display = "block";
 
-                // Real-time Updates
+                // Real-time listener
                 if (unsubscribe) unsubscribe();
                 unsubscribe = onSnapshot(userRef, (snapshot) => {
                     if (snapshot.exists()) {
@@ -173,19 +172,19 @@
                             });
                             document.getElementById("recordsList").innerHTML = html;
                         } else {
-                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">Nta amakuru aragera kuri konti...</p>';
+                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">No transactions yet...</p>';
                         }
                     }
                 });
             } else {
-                alert("PIN Code wanditse si yo! Gerageza gushyiramo neza.");
+                alert("Incorrect PIN! Please try again.");
             }
         } else {
-            alert("Iyi nimero ntarayandikishwa. Banza ukande kuri 'Kwiyandikisha' ureme konti!");
+            alert("Account not found! Please register first.");
         }
     });
 
-    // Logout Action
+    // Logout
     document.getElementById("logoutBtn").addEventListener("click", () => {
         if (unsubscribe) unsubscribe();
         document.getElementById("authTabs").style.display = "flex";
