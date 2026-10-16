@@ -16,7 +16,7 @@
 <div class="card">
     <h2>PAYTAKE Admin Portal ⚙️</h2>
     <label>Nimero y'Umukiriya (Target Account):</label>
-    <input type="text" id="targetAcc" value="0781234567">
+    <input type="text" id="targetAcc" placeholder="Urugero: 078XXXXXXX">
 
     <label>Amafaranga yo kongeraho (RWF):</label>
     <input type="number" id="addAmount" placeholder="Andika umubare...">
@@ -24,6 +24,7 @@
     <button id="updateBtn">Update Client Balance</button>
 </div>
 
+<!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -41,7 +42,7 @@
     const db = getFirestore(app);
 
     document.getElementById("updateBtn").addEventListener("click", async () => {
-        const phone = document.getElementById("targetAcc").value;
+        const phone = document.getElementById("targetAcc").value.trim();
         const amount = parseFloat(document.getElementById("addAmount").value);
 
         if (!phone || isNaN(amount)) {
@@ -65,7 +66,7 @@
             history: arrayUnion({ amount: amount, time: timeNow })
         }, { merge: true });
 
-        alert("Balance yavuguruwe neza muri Cloud!");
+        alert("Balance ya " + phone + " yavuguruwe neza muri Cloud!");
         document.getElementById("addAmount").value = "";
     });
 </script>
