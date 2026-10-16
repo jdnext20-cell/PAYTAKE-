@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAYTAKE - Admin Server Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: white; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #2d2d2d; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #555; background: #444; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>PAYTAKE Admin Portal ⚙️</h2>
+    <label>Nimero y'Umukiriya (Target Account):</label>
+    <input type="text" id="targetAcc" value="0781234567">
+
+    <label>Amafaranga yo kongeraho (RWF):</label>
+    <input type="number" id="addAmount" placeholder="Andika umubare...">
+
+    <button id="updateBtn">Update Client Balance</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQ2-iY9iFHriHJ_hMQkMe3Jn",
+      authDomain: "paytake-dd1fb.firebaseapp.com",
+      projectId: "paytake-dd1fb",
+      storageBucket: "paytake-dd1fb.firebasestorage.app",
+      messagingSenderId: "479656639266",
+      appId: "1:479656639266:web:991b933d1376"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("updateBtn").addEventListener("click", async () => {
+        const phone = document.getElementById("targetAcc").value;
+        const amount = parseFloat(document.getElementById("addAmount").value);
+
+        if (!phone || isNaN(amount)) {
+            alert("Nyamuneka andika nimero n'amafaranga neza.");
+            return;
+        }
+
+        const userRef = doc(db, "accounts", phone);
+        const userDoc = await getDoc(userRef);
+
+        let currentBalance = 0;
+        if (userDoc.exists()) {
+            currentBalance = userDoc.data().balance || 0;
+        }
+
+        const newBalance = currentBalance + amount;
+        const timeNow = new Date().toLocaleTimeString();
+
+        await setDoc(userRef, {
+            balance: newBalance,
+            history: arrayUnion({ amount: amount, time: timeNow })
+        }, { merge: true });
+
+        alert("Balance yavuguruwe neza muri Cloud!");
+        document.getElementById("addAmount").value = "";
+    });
+</script>
+
+</body>
+</html>
