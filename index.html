@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAYTAKE - Mobile App</title>
+    <title>PAYTAKE - Client Portal</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
@@ -11,21 +11,49 @@
         .balance-box { background: #0d47a1; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
         .balance-amount { font-size: 28px; font-weight: bold; margin-top: 5px; }
         .record-item { display: flex; justify-content: space-between; padding: 10px; background: #eef2f5; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
-        input { width: 100%; padding: 10px; margin: 8px 0 12px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #1976d2; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        input { width: 100%; padding: 10px; margin: 6px 0 12px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
+        .btn-register { background: #28a745; }
+        .logout-btn { background: #d32f2f; margin-top: 15px; }
+        .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .tab { cursor: pointer; font-weight: bold; color: #555; }
+        .tab.active { color: #1976d2; border-bottom: 2px solid #1976d2; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="header">PAYTAKE Mobile App 📱</div>
+    <div class="header">PAYTAKE Mobile App 🔒</div>
     
-    <label style="font-size: 13px; font-weight: bold;">Andika Nimero yawe ya Konti:</label>
-    <input type="text" id="phoneInput" placeholder="Urugero: 078XXXXXXX">
-    <button id="checkBtn">Shakisha Konti</button>
+    <!-- Navigation Tabs -->
+    <div id="authTabs" class="tabs">
+        <span id="loginTab" class="tab active">Kwinjira (Login)</span>
+        <span id="regTab" class="tab">Kwiyandikisha (Register)</span>
+    </div>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+    <!-- Login Form -->
+    <div id="loginForm">
+        <label style="font-size: 13px; font-weight: bold;">Nimero ya Telefone:</label>
+        <input type="text" id="loginPhone" placeholder="078XXXXXXX">
 
+        <label style="font-size: 13px; font-weight: bold;">PIN Code (Imibare 4):</label>
+        <input type="password" id="loginPin" maxlength="4" placeholder="****">
+
+        <button id="loginBtn">Kwinjira mu Konti</button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" style="display: none;">
+        <label style="font-size: 13px; font-weight: bold;">Nimero nshya ya Telefone:</label>
+        <input type="text" id="regPhone" placeholder="078XXXXXXX">
+
+        <label style="font-size: 13px; font-weight: bold;">Hitamo PIN Code (Imibare 4):</label>
+        <input type="password" id="regPin" maxlength="4" placeholder="****">
+
+        <button id="registerBtn" class="btn-register">Kurema Konti Nshya</button>
+    </div>
+
+    <!-- Dashboard Screen -->
     <div id="accountDisplay" style="display: none;">
         <p style="font-size: 14px;">Konti: <strong id="accNo">-</strong></p>
         
@@ -38,13 +66,15 @@
         <div id="recordsList">
             <p style="color: #777; font-size: 12px;">Nta amakuru aragera kuri konti...</p>
         </div>
+
+        <button class="logout-btn" id="logoutBtn">Sohoka (Logout)</button>
     </div>
 </div>
 
 <!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDQ2-iY9iFHriHJ_hMQkMe3Jn",
@@ -60,38 +90,108 @@
 
     let unsubscribe = null;
 
-    document.getElementById("checkBtn").addEventListener("click", () => {
-        const phone = document.getElementById("phoneInput").value.trim();
-        if (!phone) {
-            alert("Nyamuneka andika nimero yawe neza!");
+    // Toggle Tab Logic
+    const loginTab = document.getElementById("loginTab");
+    const regTab = document.getElementById("regTab");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+
+    loginTab.addEventListener("click", () => {
+        loginTab.classList.add("active");
+        regTab.classList.remove("active");
+        loginForm.style.display = "block";
+        registerForm.style.display = "none";
+    });
+
+    regTab.addEventListener("click", () => {
+        regTab.classList.add("active");
+        loginTab.classList.remove("active");
+        registerForm.style.display = "block";
+        loginForm.style.display = "none";
+    });
+
+    // Registration Action
+    document.getElementById("registerBtn").addEventListener("click", async () => {
+        const phone = document.getElementById("regPhone").value.trim();
+        const pin = document.getElementById("regPin").value.trim();
+
+        if (!phone || pin.length !== 4) {
+            alert("Andika nimero ya telefone hamwe na PIN y'imibare 4 neza!");
             return;
         }
 
-        document.getElementById("accNo").innerText = phone;
-        document.getElementById("accountDisplay").style.display = "block";
+        const userRef = doc(db, "accounts", phone);
+        const docSnap = await getDoc(userRef);
 
-        if (unsubscribe) unsubscribe(); // Ohoza listen mbere
+        if (docSnap.exists()) {
+            alert("Iyi nimero irasanzwe ifite konti! Koresha paje ya Login.");
+        } else {
+            await setDoc(userRef, {
+                pin: pin,
+                balance: 0,
+                history: []
+            });
+            alert("Konti yawe yaremwe neza! Ubu ushobora kwinjira (Login).");
+            loginTab.click();
+            document.getElementById("loginPhone").value = phone;
+        }
+    });
 
-        // Listen to Firestore real-time for this specific phone number
-        unsubscribe = onSnapshot(doc(db, "accounts", phone), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                document.getElementById("clientBalance").innerText = (data.balance || 0).toLocaleString() + " RWF";
-                
-                if (data.history && data.history.length > 0) {
-                    let html = "";
-                    [...data.history].reverse().forEach(rec => {
-                        html += `<div class="record-item"><span style="color:green; font-weight:bold;">+${rec.amount.toLocaleString()} RWF</span><span style="color:#666;">${rec.time}</span></div>`;
-                    });
-                    document.getElementById("recordsList").innerHTML = html;
-                } else {
-                    document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">Nta amakuru aragera kuri konti...</p>';
-                }
+    // Login Action
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+        const phone = document.getElementById("loginPhone").value.trim();
+        const pin = document.getElementById("loginPin").value.trim();
+
+        if (!phone || !pin) {
+            alert("Andika nimero n'umubare w'ibanga (PIN) neza.");
+            return;
+        }
+
+        const userRef = doc(db, "accounts", phone);
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.pin && data.pin === pin) {
+                document.getElementById("accNo").innerText = phone;
+                document.getElementById("authTabs").style.display = "none";
+                loginForm.style.display = "none";
+                registerForm.style.display = "none";
+                document.getElementById("accountDisplay").style.display = "block";
+
+                // Real-time Updates
+                if (unsubscribe) unsubscribe();
+                unsubscribe = onSnapshot(userRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const updatedData = snapshot.data();
+                        document.getElementById("clientBalance").innerText = (updatedData.balance || 0).toLocaleString() + " RWF";
+                        
+                        if (updatedData.history && updatedData.history.length > 0) {
+                            let html = "";
+                            [...updatedData.history].reverse().forEach(rec => {
+                                html += `<div class="record-item"><span style="color:green; font-weight:bold;">+${rec.amount.toLocaleString()} RWF</span><span style="color:#666;">${rec.time}</span></div>`;
+                            });
+                            document.getElementById("recordsList").innerHTML = html;
+                        } else {
+                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">Nta amakuru aragera kuri konti...</p>';
+                        }
+                    }
+                });
             } else {
-                document.getElementById("clientBalance").innerText = "0 RWF";
-                document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">Iyi konti ntaragira amafaranga yakira.</p>';
+                alert("PIN Code wanditse si yo! Gerageza gushyiramo neza.");
             }
-        });
+        } else {
+            alert("Iyi nimero ntarayandikishwa. Banza ukande kuri 'Kwiyandikisha' ureme konti!");
+        }
+    });
+
+    // Logout Action
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        if (unsubscribe) unsubscribe();
+        document.getElementById("authTabs").style.display = "flex";
+        loginTab.click();
+        document.getElementById("accountDisplay").style.display = "none";
+        document.getElementById("loginPin").value = "";
     });
 </script>
 
