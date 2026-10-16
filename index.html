@@ -1,244 +1,74 @@
 <!DOCTYPE html>
 <html lang="rw">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAYTAKE - Digital Payment & Merchant System</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 15px;
-      min-height: 100vh;
-    }
-
-    .dashboard-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%;
-      max-width: 420px;
-    }
-
-    .panel {
-      background: #ffffff;
-      border-radius: 14px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      overflow: hidden;
-      border: 1px solid #e0e0e0;
-    }
-
-    .panel-header {
-      background: #1a73e8;
-      color: white;
-      padding: 14px 18px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 1rem;
-    }
-
-    .admin-header {
-      background: #212529;
-    }
-
-    .panel-body {
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      color: #495057;
-      font-weight: 600;
-    }
-
-    .form-group input {
-      padding: 12px;
-      border: 1px solid #ced4da;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus {
-      border-color: #1a73e8;
-    }
-
-    .btn {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn:hover {
-      background-color: #1557b0;
-    }
-
-    .btn-admin {
-      background-color: #212529;
-    }
-
-    .btn-admin:hover {
-      background-color: #000000;
-    }
-
-    .balance-box {
-      background: linear-gradient(135deg, #1a73e8, #0d47a1);
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3);
-    }
-
-    .balance-label {
-      font-size: 0.85rem;
-      opacity: 0.9;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .balance-value {
-      font-size: 1.8rem;
-      font-weight: bold;
-      margin-top: 5px;
-    }
-
-    .records-list {
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 8px;
-      font-size: 0.85rem;
-      background: #f8f9fa;
-      max-height: 120px;
-      overflow-y: auto;
-    }
-
-    .record-item {
-      padding: 8px;
-      border-bottom: 1px solid #e9ecef;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .record-item:last-child {
-      border-bottom: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAYTAKE - Admin Server Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: white; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #2d2d2d; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #555; background: #444; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    </style>
 </head>
 <body>
 
-<div class="dashboard-container">
+<div class="card">
+    <h2>PAYTAKE Admin Portal ⚙️</h2>
+    <label>Nimero y'Umukiriya (Target Account):</label>
+    <input type="text" id="targetAcc" value="0781234567">
 
-  <!-- ADMIN PANEL (SERVER CONTROL) -->
-  <div class="panel">
-    <div class="panel-header admin-header">
-      <span>PAYTAKE Admin Server</span>
-      <span>⚙️</span>
-    </div>
-    <div class="panel-body">
-      <div class="form-group">
-        <label>Nimero y'Umukiriya (Target Account):</label>
-        <input type="text" id="targetPhone" value="0781234567" readonly>
-      </div>
-      <div class="form-group">
-        <label>Amafaranga yo kongeraho (RWF):</label>
-        <input type="number" id="amountInput" placeholder="Andika umubare...">
-      </div>
-      <button class="btn btn-admin" onclick="updateCustomerBalance()">Update Client Balance</button>
-    </div>
-  </div>
+    <label>Amafaranga yo kongeraho (RWF):</label>
+    <input type="number" id="addAmount" placeholder="Andika umubare...">
 
-  <!-- PAYTAKE CLIENT APP -->
-  <div class="panel">
-    <div class="panel-header">
-      <span>PAYTAKE Mobile App</span>
-      <span>📱</span>
-    </div>
-    <div class="panel-body">
-      <div style="font-size: 0.9rem; font-weight: 600; color: #495057;">
-        Konti: <span id="displayPhone" style="color: #1a73e8;">0781234567</span>
-      </div>
-      <div class="balance-box">
-        <div class="balance-label">Available Balance</div>
-        <div class="balance-value" id="displayBalance">0 RWF</div>
-      </div>
-      <div class="form-group">
-        <label>Amateka y'Ibyakozwe (Withdrawal Records):</label>
-        <div class="records-list" id="recordsList">
-          <div class="record-item" style="color: #6c757d; justify-content: center;">Nta mateka arimo</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+    <button id="updateBtn">Update Client Balance</button>
 </div>
 
-<script>
-  let currentBalance = 0;
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  function updateCustomerBalance() {
-    const inputField = document.getElementById('amountInput');
-    const inputVal = inputField.value;
-    
-    if (!inputVal || isNaN(inputVal) || parseFloat(inputVal) <= 0) {
-      alert("Nyamuneka andika umubare w'amafaranga ufatika!");
-      return;
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQ2-iY9iFHriHJ_hMQkMe3Jn",
+      authDomain: "paytake-dd1fb.firebaseapp.com",
+      projectId: "paytake-dd1fb",
+      storageBucket: "paytake-dd1fb.firebasestorage.app",
+      messagingSenderId: "479656639266",
+      appId: "1:479656639266:web:991b933d1376"
+    };
 
-    const addedAmount = parseFloat(inputVal);
-    currentBalance += addedAmount;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    // Vugurura balance ku screen
-    document.getElementById('displayBalance').innerText = currentBalance.toLocaleString() + " RWF";
+    document.getElementById("updateBtn").addEventListener("click", async () => {
+        const phone = document.getElementById("targetAcc").value;
+        const amount = parseFloat(document.getElementById("addAmount").value);
 
-    // Vugurura amateka (records)
-    const recordsList = document.getElementById('recordsList');
-    if (recordsList.innerHTML.includes("Nta mateka arimo")) {
-      recordsList.innerHTML = "";
-    }
+        if (!phone || isNaN(amount)) {
+            alert("Nyamuneka andika nimero n'amafaranga neza.");
+            return;
+        }
 
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const recordItem = document.createElement('div');
-    recordItem.className = 'record-item';
-    recordItem.innerHTML = `
-      <span style="color: #2b8a3e; font-weight: bold;">+${addedAmount.toLocaleString()} RWF</span>
-      <span style="color: #6c757d; font-size: 0.75rem;">${now}</span>
-    `;
-    recordsList.prepend(recordItem);
+        const userRef = doc(db, "accounts", phone);
+        const userDoc = await getDoc(userRef);
 
-    // Siba mu kago k'ibipimo
-    inputField.value = "";
-  }
+        let currentBalance = 0;
+        if (userDoc.exists()) {
+            currentBalance = userDoc.data().balance || 0;
+        }
+
+        const newBalance = currentBalance + amount;
+        const timeNow = new Date().toLocaleTimeString();
+
+        await setDoc(userRef, {
+            balance: newBalance,
+            history: arrayUnion({ amount: amount, time: timeNow })
+        }, { merge: true });
+
+        alert("Balance yavuguruwe neza muri Cloud!");
+        document.getElementById("addAmount").value = "";
+    });
 </script>
 
 </body>
-  </html>
-  
+</html>
