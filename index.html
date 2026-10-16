@@ -3,30 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAYTAKE - Admin Server Portal</title>
+    <title>PAYTAKE - Mobile App</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: white; padding: 20px; display: flex; justify-content: center; }
-        .card { background: #2d2d2d; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #555; background: #444; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .header { background: #1976d2; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; font-weight: bold; margin: -20px -20px 20px -20px; }
+        .balance-box { background: #0d47a1; color: white; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        .balance-amount { font-size: 28px; font-weight: bold; margin-top: 5px; }
+        .record-item { display: flex; justify-content: space-between; padding: 10px; background: #eef2f5; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>PAYTAKE Admin Portal ⚙️</h2>
-    <label>Nimero y'Umukiriya (Target Account):</label>
-    <input type="text" id="targetAcc" value="0781234567">
+    <div class="header">PAYTAKE Mobile App 📱</div>
+    <p style="font-size: 14px;">Konti: <strong id="accNo">0781234567</strong></p>
+    
+    <div class="balance-box">
+        <div style="font-size: 12px; opacity: 0.8;">AVAILABLE BALANCE</div>
+        <div class="balance-amount" id="clientBalance">0 RWF</div>
+    </div>
 
-    <label>Amafaranga yo kongeraho (RWF):</label>
-    <input type="number" id="addAmount" placeholder="Andika umubare...">
-
-    <button id="updateBtn">Update Client Balance</button>
+    <h4 style="margin-bottom: 10px;">Amateka y'Ibyakozwe (Live Records):</h4>
+    <div id="recordsList">
+        <p style="color: #777; font-size: 12px;">Nta makuru aragera kuri konti...</p>
+    </div>
 </div>
 
+<!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDQ2-iY9iFHriHJ_hMQkMe3Jn",
@@ -40,33 +47,21 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    document.getElementById("updateBtn").addEventListener("click", async () => {
-        const phone = document.getElementById("targetAcc").value;
-        const amount = parseFloat(document.getElementById("addAmount").value);
-
-        if (!phone || isNaN(amount)) {
-            alert("Nyamuneka andika nimero n'amafaranga neza.");
-            return;
+    const clientPhone = "0781234567";
+    
+    onSnapshot(doc(db, "accounts", clientPhone), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById("clientBalance").innerText = (data.balance || 0).toLocaleString() + " RWF";
+            
+            if (data.history && data.history.length > 0) {
+                let html = "";
+                [...data.history].reverse().forEach(rec => {
+                    html += `<div class="record-item"><span style="color:green; font-weight:bold;">+${rec.amount.toLocaleString()} RWF</span><span style="color:#666;">${rec.time}</span></div>`;
+                });
+                document.getElementById("recordsList").innerHTML = html;
+            }
         }
-
-        const userRef = doc(db, "accounts", phone);
-        const userDoc = await getDoc(userRef);
-
-        let currentBalance = 0;
-        if (userDoc.exists()) {
-            currentBalance = userDoc.data().balance || 0;
-        }
-
-        const newBalance = currentBalance + amount;
-        const timeNow = new Date().toLocaleTimeString();
-
-        await setDoc(userRef, {
-            balance: newBalance,
-            history: arrayUnion({ amount: amount, time: timeNow })
-        }, { merge: true });
-
-        alert("Balance yavuguruwe neza muri Cloud!");
-        document.getElementById("addAmount").value = "";
     });
 </script>
 
