@@ -3,21 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAYTAKE - Client Portal</title>
+    <title>PAYTAKE - Global Client Portal</title>
+    <!-- EmailJS SDK for Email Verification -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 420px; }
         .header { background: #1976d2; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; font-weight: bold; margin: -20px -20px 20px -20px; }
         .balance-box { background: #0d47a1; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
         .balance-amount { font-size: 28px; font-weight: bold; margin-top: 5px; }
-        .record-item { display: flex; justify-content: space-between; padding: 10px; background: #eef2f5; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
-        input { width: 100%; padding: 10px; margin: 6px 0 12px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
+        .record-item { display: flex; justify-content: space-between; padding: 10px; background: #eef2f5; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+        input { width: 100%; padding: 10px; margin: 5px 0 12px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { width: 100%; padding: 11px; background: #1976d2; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
         .btn-register { background: #28a745; }
+        .btn-action { background: #007bff; margin-top: 5px; }
         .logout-btn { background: #d32f2f; margin-top: 15px; }
         .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         .tab { cursor: pointer; font-weight: bold; color: #555; }
         .tab.active { color: #1976d2; border-bottom: 2px solid #1976d2; }
+        .section-box { border: 1px solid #e0e0e0; padding: 12px; border-radius: 8px; margin-bottom: 15px; background: #fafafa; }
+        .section-title { font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #333; }
     </style>
 </head>
 <body>
@@ -33,10 +38,10 @@
 
     <!-- Login Form -->
     <div id="loginForm">
-        <label style="font-size: 13px; font-weight: bold;">Phone Number:</label>
+        <label style="font-size: 12px; font-weight: bold;">Phone Number:</label>
         <input type="text" id="loginPhone" placeholder="e.g. 078XXXXXXX">
 
-        <label style="font-size: 13px; font-weight: bold;">PIN Code (4 digits):</label>
+        <label style="font-size: 12px; font-weight: bold;">4-Digit PIN:</label>
         <input type="password" id="loginPin" maxlength="4" placeholder="****">
 
         <button id="loginBtn">Sign In</button>
@@ -44,24 +49,60 @@
 
     <!-- Register Form -->
     <div id="registerForm" style="display: none;">
-        <label style="font-size: 13px; font-weight: bold;">New Phone Number:</label>
+        <label style="font-size: 12px; font-weight: bold;">Full Name:</label>
+        <input type="text" id="regName" placeholder="e.g. Jean Damour">
+
+        <label style="font-size: 12px; font-weight: bold;">Email Address:</label>
+        <input type="email" id="regEmail" placeholder="e.g. name@example.com">
+
+        <label style="font-size: 12px; font-weight: bold;">Phone Number:</label>
         <input type="text" id="regPhone" placeholder="e.g. 078XXXXXXX">
 
-        <label style="font-size: 13px; font-weight: bold;">Create 4-digit PIN:</label>
+        <label style="font-size: 12px; font-weight: bold;">Create 4-digit PIN:</label>
         <input type="password" id="regPin" maxlength="4" placeholder="****">
 
         <button id="registerBtn" class="btn-register">Create Account</button>
     </div>
 
-    <!-- Dashboard Screen -->
+    <!-- Main Client Dashboard -->
     <div id="accountDisplay" style="display: none;">
-        <p style="font-size: 14px;">Account: <strong id="accNo">-</strong></p>
+        <div style="font-size: 14px; margin-bottom: 10px;">
+            Welcome, <strong id="userFullName">-</strong><br>
+            <span style="font-size: 12px; color: #666;">Account: <strong id="accNo">-</strong></span>
+        </div>
         
         <div class="balance-box">
             <div style="font-size: 12px; opacity: 0.8;">AVAILABLE BALANCE</div>
             <div class="balance-amount" id="clientBalance">0 RWF</div>
         </div>
 
+        <!-- 1. Send Money Section -->
+        <div class="section-box">
+            <div class="section-title">💸 Transfer Money</div>
+            <input type="text" id="receiverPhone" placeholder="Receiver Phone Number">
+            <input type="number" id="sendAmount" placeholder="Amount (RWF)">
+            <button id="sendMoneyBtn" class="btn-action">Send Money Now</button>
+        </div>
+
+        <!-- 2. Request Withdrawal Section -->
+        <div class="section-box">
+            <div class="section-title">🏧 Request Withdrawal</div>
+            <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw (RWF)">
+            <button id="withdrawBtn" style="background: #ff9800;">Request Cash-Out</button>
+        </div>
+
+        <!-- 3. Change PIN with Email Verification -->
+        <div class="section-box">
+            <div class="section-title">🔑 Security (Reset/Change PIN)</div>
+            <button id="sendCodeBtn" style="background: #6c757d;">1. Send Verification Code to Email</button>
+            <div id="verificationFields" style="display: none; margin-top: 8px;">
+                <input type="text" id="inputOtp" placeholder="Enter Email Verification Code">
+                <input type="password" id="newPin" maxlength="4" placeholder="Enter New 4-Digit PIN">
+                <button id="confirmPinBtn" style="background: #28a745;">2. Confirm New PIN</button>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
         <h4 style="margin-bottom: 10px;">Transaction History:</h4>
         <div id="recordsList">
             <p style="color: #777; font-size: 12px;">No activity yet...</p>
@@ -74,7 +115,7 @@
 <!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDQ2-iY9iFHriHJ_hMQkMe3Jn",
@@ -89,7 +130,10 @@
     const db = getFirestore(app);
 
     let unsubscribe = null;
+    let currentUser = null;
+    let generatedOtp = null;
 
+    // Tabs Switch Logic
     const loginTab = document.getElementById("loginTab");
     const regTab = document.getElementById("regTab");
     const loginForm = document.getElementById("loginForm");
@@ -109,13 +153,15 @@
         loginForm.style.display = "none";
     });
 
-    // Registration Logic
+    // Registration Action
     document.getElementById("registerBtn").addEventListener("click", async () => {
+        const name = document.getElementById("regName").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
         const phone = document.getElementById("regPhone").value.trim();
         const pin = document.getElementById("regPin").value.trim();
 
-        if (!phone || pin.length !== 4) {
-            alert("Please enter a valid phone number and a 4-digit PIN!");
+        if (!name || !email || !phone || pin.length !== 4) {
+            alert("Please fill in all details and enter a 4-digit PIN!");
             return;
         }
 
@@ -123,26 +169,28 @@
         const docSnap = await getDoc(userRef);
 
         if (docSnap.exists()) {
-            alert("This phone number is already registered. Please sign in.");
+            alert("This phone number is already registered. Please login!");
         } else {
             await setDoc(userRef, {
+                fullName: name,
+                email: email,
                 pin: pin,
                 balance: 0,
                 history: []
             });
-            alert("Account created successfully! You can now log in.");
+            alert("Account registered successfully! You can now log in.");
             loginTab.click();
             document.getElementById("loginPhone").value = phone;
         }
     });
 
-    // Login Logic
+    // Login Action
     document.getElementById("loginBtn").addEventListener("click", async () => {
         const phone = document.getElementById("loginPhone").value.trim();
         const pin = document.getElementById("loginPin").value.trim();
 
         if (!phone || !pin) {
-            alert("Please enter both phone number and PIN.");
+            alert("Please enter phone number and PIN.");
             return;
         }
 
@@ -152,27 +200,34 @@
         if (docSnap.exists()) {
             const data = docSnap.data();
             if (data.pin && data.pin === pin) {
+                currentUser = { phone, ...data };
                 document.getElementById("accNo").innerText = phone;
+                document.getElementById("userFullName").innerText = data.fullName || "Valued Customer";
                 document.getElementById("authTabs").style.display = "none";
                 loginForm.style.display = "none";
                 registerForm.style.display = "none";
                 document.getElementById("accountDisplay").style.display = "block";
 
-                // Real-time listener
+                // Real-time Updates Listener
                 if (unsubscribe) unsubscribe();
                 unsubscribe = onSnapshot(userRef, (snapshot) => {
                     if (snapshot.exists()) {
-                        const updatedData = snapshot.data();
-                        document.getElementById("clientBalance").innerText = (updatedData.balance || 0).toLocaleString() + " RWF";
+                        const updated = snapshot.data();
+                        currentUser.balance = updated.balance;
+                        document.getElementById("clientBalance").innerText = (updated.balance || 0).toLocaleString() + " RWF";
                         
-                        if (updatedData.history && updatedData.history.length > 0) {
+                        if (updated.history && updated.history.length > 0) {
                             let html = "";
-                            [...updatedData.history].reverse().forEach(rec => {
-                                html += `<div class="record-item"><span style="color:green; font-weight:bold;">+${rec.amount.toLocaleString()} RWF</span><span style="color:#666;">${rec.time}</span></div>`;
+                            [...updated.history].reverse().forEach(rec => {
+                                const color = rec.type === "Received" || rec.type === "TopUp" ? "green" : "red";
+                                html += `<div class="record-item">
+                                    <div><strong>${rec.type}</strong><br><small style="color:#666;">${rec.time}</small></div>
+                                    <div style="color:${color}; font-weight:bold;">${rec.amount > 0 ? '+' : ''}${rec.amount.toLocaleString()} RWF</div>
+                                </div>`;
                             });
                             document.getElementById("recordsList").innerHTML = html;
                         } else {
-                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">No transactions yet...</p>';
+                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">No activity yet...</p>';
                         }
                     }
                 });
@@ -180,11 +235,121 @@
                 alert("Incorrect PIN! Please try again.");
             }
         } else {
-            alert("Account not found! Please register first.");
+            alert("Account not found. Please Register first.");
         }
     });
 
-    // Logout
+    // 1. Transfer Money Logic
+    document.getElementById("sendMoneyBtn").addEventListener("click", async () => {
+        const targetPhone = document.getElementById("receiverPhone").value.trim();
+        const amount = parseFloat(document.getElementById("sendAmount").value);
+
+        if (!targetPhone || isNaN(amount) || amount <= 0) {
+            alert("Enter valid target phone number and transfer amount!");
+            return;
+        }
+
+        if (targetPhone === currentUser.phone) {
+            alert("You cannot transfer money to your own account!");
+            return;
+        }
+
+        if ((currentUser.balance || 0) < amount) {
+            alert("Insufficient Balance for this transfer!");
+            return;
+        }
+
+        const receiverRef = doc(db, "accounts", targetPhone);
+        const receiverDoc = await getDoc(receiverRef);
+
+        if (!receiverDoc.exists()) {
+            alert("Target receiver account does not exist!");
+            return;
+        }
+
+        const timeNow = new Date().toLocaleTimeString();
+
+        // Deduct from Sender
+        const senderRef = doc(db, "accounts", currentUser.phone);
+        await updateDoc(senderRef, {
+            balance: currentUser.balance - amount,
+            history: arrayUnion({ type: "Sent to " + targetPhone, amount: -amount, time: timeNow })
+        });
+
+        // Add to Receiver
+        const recBalance = receiverDoc.data().balance || 0;
+        await updateDoc(receiverRef, {
+            balance: recBalance + amount,
+            history: arrayUnion({ type: "Received from " + currentUser.phone, amount: amount, time: timeNow })
+        });
+
+        alert("Successfully transferred " + amount + " RWF to " + targetPhone);
+        document.getElementById("receiverPhone").value = "";
+        document.getElementById("sendAmount").value = "";
+    });
+
+    // 2. Withdrawal Request Logic
+    document.getElementById("withdrawBtn").addEventListener("click", async () => {
+        const amount = parseFloat(document.getElementById("withdrawAmount").value);
+
+        if (isNaN(amount) || amount <= 0) {
+            alert("Enter a valid amount to withdraw!");
+            return;
+        }
+
+        if ((currentUser.balance || 0) < amount) {
+            alert("Insufficient Balance!");
+            return;
+        }
+
+        const timeNow = new Date().toLocaleTimeString();
+        const senderRef = doc(db, "accounts", currentUser.phone);
+
+        await updateDoc(senderRef, {
+            balance: currentUser.balance - amount,
+            history: arrayUnion({ type: "Withdrawal Request", amount: -amount, time: timeNow })
+        });
+
+        alert("Withdrawal request submitted for " + amount + " RWF. Admin will process your cash!");
+        document.getElementById("withdrawAmount").value = "";
+    });
+
+    // 3. Email Verification for PIN Change
+    document.getElementById("sendCodeBtn").addEventListener("click", () => {
+        if (!currentUser.email) {
+            alert("No email associated with this account!");
+            return;
+        }
+
+        generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+        alert("SECURITY CODE: Your OTP verification code is: " + generatedOtp + "\n(Code simulated for " + currentUser.email + ")");
+        document.getElementById("verificationFields").style.display = "block";
+    });
+
+    document.getElementById("confirmPinBtn").addEventListener("click", async () => {
+        const inputOtp = document.getElementById("inputOtp").value.trim();
+        const newPin = document.getElementById("newPin").value.trim();
+
+        if (inputOtp !== generatedOtp) {
+            alert("Invalid Email Verification Code (OTP)!");
+            return;
+        }
+
+        if (newPin.length !== 4) {
+            alert("New PIN must be exactly 4 digits!");
+            return;
+        }
+
+        const userRef = doc(db, "accounts", currentUser.phone);
+        await updateDoc(userRef, { pin: newPin });
+
+        alert("Your Security PIN has been updated successfully!");
+        document.getElementById("verificationFields").style.display = "none";
+        document.getElementById("inputOtp").value = "";
+        document.getElementById("newPin").value = "";
+    });
+
+    // Logout Action
     document.getElementById("logoutBtn").addEventListener("click", () => {
         if (unsubscribe) unsubscribe();
         document.getElementById("authTabs").style.display = "flex";
@@ -195,5 +360,4 @@
 </script>
 
 </body>
-    </html>
-    
+</html>
