@@ -3,113 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAYTAKE - Global Client Portal</title>
-    <!-- EmailJS SDK for Email Verification -->
+    <title>PAYTAKE - Global FinTech Portal</title>
+    <!-- FontAwesome & EmailJS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 420px; }
-        .header { background: #1976d2; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; font-weight: bold; margin: -20px -20px 20px -20px; }
-        .balance-box { background: #0d47a1; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
-        .balance-amount { font-size: 28px; font-weight: bold; margin-top: 5px; }
-        .record-item { display: flex; justify-content: space-between; padding: 10px; background: #eef2f5; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
-        input { width: 100%; padding: 10px; margin: 5px 0 12px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { width: 100%; padding: 11px; background: #1976d2; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
-        .btn-register { background: #28a745; }
-        .btn-action { background: #007bff; margin-top: 5px; }
-        .logout-btn { background: #d32f2f; margin-top: 15px; }
-        .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        .tab { cursor: pointer; font-weight: bold; color: #555; }
-        .tab.active { color: #1976d2; border-bottom: 2px solid #1976d2; }
-        .section-box { border: 1px solid #e0e0e0; padding: 12px; border-radius: 8px; margin-bottom: 15px; background: #fafafa; }
-        .section-title { font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #333; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { background: white; width: 100%; max-width: 420px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: hidden; }
+        
+        .auth-card { padding: 30px 20px; }
+        .auth-header { text-align: center; margin-bottom: 25px; }
+        .auth-header h2 { color: #1976d2; font-size: 24px; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab { flex: 1; text-align: center; padding: 10px; font-weight: bold; color: #777; cursor: pointer; }
+        .tab.active { color: #1976d2; border-bottom: 3px solid #1976d2; }
+        input, select { width: 100%; padding: 12px; margin: 6px 0 14px 0; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
+        
+        .top-bar { background: #1976d2; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .top-bar .icon-btn { font-size: 20px; cursor: pointer; }
+        .top-bar .brand-title { font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+
+        .dashboard-body { padding: 20px; }
+        .balance-card { background: linear-gradient(135deg, #1976d2, #0d47a1); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 8px 16px rgba(25, 118, 210, 0.25); margin-bottom: 20px; }
+        .balance-title { font-size: 12px; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
+        .balance-val { font-size: 28px; font-weight: bold; margin: 8px 0; }
+        .acc-info { font-size: 12px; opacity: 0.9; }
+
+        .section-label { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
+        .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .service-item { background: #f8f9fa; border-radius: 12px; padding: 12px 5px; text-align: center; cursor: pointer; border: 1px solid #eef0f2; }
+        .service-item:hover { background: #eef5ff; border-color: #1976d2; }
+        .service-icon { font-size: 20px; color: #1976d2; margin-bottom: 5px; }
+        .service-name { font-size: 11px; font-weight: 600; color: #444; }
+
+        .sidebar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+        .sidebar { position: absolute; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 100; transition: 0.3s ease; display: flex; flex-direction: column; }
+        .sidebar.active { left: 0; }
+        .sidebar-header { background: #1976d2; color: white; padding: 25px 20px; }
+        .sidebar-menu { list-style: none; padding: 15px 0; flex: 1; }
+        .sidebar-menu li { padding: 14px 20px; font-size: 14px; font-weight: 600; color: #444; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .sidebar-menu li:hover { background: #f0f4f9; color: #1976d2; }
+
+        .modal-screen { display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; }
+        .record-card { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9fbfd; border-radius: 8px; margin-bottom: 8px; font-size: 13px; border-left: 4px solid #1976d2; }
+        .receipt-btn { background: #6c757d; font-size: 10px; padding: 4px 8px; width: auto; margin: 0; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="header">PAYTAKE Mobile App 🔒</div>
-    
-    <!-- Navigation Tabs -->
-    <div id="authTabs" class="tabs">
-        <span id="loginTab" class="tab active">Login</span>
-        <span id="regTab" class="tab">Register</span>
-    </div>
+<div class="app-container">
 
-    <!-- Login Form -->
-    <div id="loginForm">
-        <label style="font-size: 12px; font-weight: bold;">Phone Number:</label>
-        <input type="text" id="loginPhone" placeholder="e.g. 078XXXXXXX">
-
-        <label style="font-size: 12px; font-weight: bold;">4-Digit PIN:</label>
-        <input type="password" id="loginPin" maxlength="4" placeholder="****">
-
-        <button id="loginBtn">Sign In</button>
-    </div>
-
-    <!-- Register Form -->
-    <div id="registerForm" style="display: none;">
-        <label style="font-size: 12px; font-weight: bold;">Full Name:</label>
-        <input type="text" id="regName" placeholder="e.g. Jean Damour">
-
-        <label style="font-size: 12px; font-weight: bold;">Email Address:</label>
-        <input type="email" id="regEmail" placeholder="e.g. name@example.com">
-
-        <label style="font-size: 12px; font-weight: bold;">Phone Number:</label>
-        <input type="text" id="regPhone" placeholder="e.g. 078XXXXXXX">
-
-        <label style="font-size: 12px; font-weight: bold;">Create 4-digit PIN:</label>
-        <input type="password" id="regPin" maxlength="4" placeholder="****">
-
-        <button id="registerBtn" class="btn-register">Create Account</button>
-    </div>
-
-    <!-- Main Client Dashboard -->
-    <div id="accountDisplay" style="display: none;">
-        <div style="font-size: 14px; margin-bottom: 10px;">
-            Welcome, <strong id="userFullName">-</strong><br>
-            <span style="font-size: 12px; color: #666;">Account: <strong id="accNo">-</strong></span>
+    <div id="overlay" class="sidebar-overlay"></div>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-user-circle" style="font-size: 40px; margin-bottom: 10px;"></i>
+            <h4 id="sideName">User Name</h4>
+            <p id="sideEmail" style="font-size: 12px; opacity: 0.8;">user@email.com</p>
         </div>
+        <ul class="sidebar-menu">
+            <li id="menuSecBtn"><i class="fa-solid fa-shield-halved" style="color:#1976d2;"></i> Security (Reset PIN)</li>
+            <li id="menuLogout" style="color: #d32f2f;"><i class="fa-solid fa-right-from-bracket" style="color:#d32f2f;"></i> Log Out</li>
+        </ul>
+    </div>
+
+    <!-- Auth Screen -->
+    <div id="authScreen" class="auth-card">
+        <div class="auth-header">
+            <h2>PAYTAKE 🔒</h2>
+            <p style="font-size: 13px; color: #666;">Global Financial Services</p>
+        </div>
+
+        <div id="authTabs" class="tabs">
+            <span id="loginTab" class="tab active">Sign In</span>
+            <span id="regTab" class="tab">Register</span>
+        </div>
+
+        <div id="loginForm">
+            <label style="font-size: 12px; font-weight: bold;">Phone Number</label>
+            <input type="text" id="loginPhone" placeholder="078XXXXXXX">
+
+            <label style="font-size: 12px; font-weight: bold;">4-Digit PIN</label>
+            <input type="password" id="loginPin" maxlength="4" placeholder="****">
+
+            <button id="loginBtn">Log In</button>
+        </div>
+
+        <div id="registerForm" style="display: none;">
+            <label style="font-size: 12px; font-weight: bold;">Full Name</label>
+            <input type="text" id="regName" placeholder="Jean Damour">
+
+            <label style="font-size: 12px; font-weight: bold;">Email Address</label>
+            <input type="email" id="regEmail" placeholder="name@example.com">
+
+            <label style="font-size: 12px; font-weight: bold;">Phone Number</label>
+            <input type="text" id="regPhone" placeholder="078XXXXXXX">
+
+            <label style="font-size: 12px; font-weight: bold;">Create 4-Digit PIN</label>
+            <input type="password" id="regPin" maxlength="4" placeholder="****">
+
+            <button id="registerBtn" style="background: #28a745;">Create Account</button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardScreen" style="display: none;">
         
-        <div class="balance-box">
-            <div style="font-size: 12px; opacity: 0.8;">AVAILABLE BALANCE</div>
-            <div class="balance-amount" id="clientBalance">0 RWF</div>
+        <div class="top-bar">
+            <i class="fa-solid fa-bars icon-btn" id="openMenuBtn"></i>
+            <span class="brand-title">PAYTAKE</span>
+            <i class="fa-solid fa-user-circle icon-btn"></i>
         </div>
 
-        <!-- 1. Send Money Section -->
-        <div class="section-box">
-            <div class="section-title">💸 Transfer Money</div>
-            <input type="text" id="receiverPhone" placeholder="Receiver Phone Number">
-            <input type="number" id="sendAmount" placeholder="Amount (RWF)">
-            <button id="sendMoneyBtn" class="btn-action">Send Money Now</button>
-        </div>
-
-        <!-- 2. Request Withdrawal Section -->
-        <div class="section-box">
-            <div class="section-title">🏧 Request Withdrawal</div>
-            <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw (RWF)">
-            <button id="withdrawBtn" style="background: #ff9800;">Request Cash-Out</button>
-        </div>
-
-        <!-- 3. Change PIN with Email Verification -->
-        <div class="section-box">
-            <div class="section-title">🔑 Security (Reset/Change PIN)</div>
-            <button id="sendCodeBtn" style="background: #6c757d;">1. Send Verification Code to Email</button>
-            <div id="verificationFields" style="display: none; margin-top: 8px;">
-                <input type="text" id="inputOtp" placeholder="Enter Email Verification Code">
-                <input type="password" id="newPin" maxlength="4" placeholder="Enter New 4-Digit PIN">
-                <button id="confirmPinBtn" style="background: #28a745;">2. Confirm New PIN</button>
+        <div class="dashboard-body">
+            
+            <div class="balance-card">
+                <div class="balance-title">Total Balance</div>
+                <div class="balance-val" id="clientBalance">0 RWF</div>
+                <div class="acc-info">Account: <span id="accNoDisplay">-</span></div>
             </div>
-        </div>
 
-        <!-- Transaction History -->
-        <h4 style="margin-bottom: 10px;">Transaction History:</h4>
-        <div id="recordsList">
-            <p style="color: #777; font-size: 12px;">No activity yet...</p>
-        </div>
+            <div class="section-label">Services</div>
+            <div class="services-grid">
+                <div class="service-item" id="btnSendService">
+                    <i class="fa-solid fa-paper-plane service-icon"></i>
+                    <div class="service-name">Send</div>
+                </div>
+                <div class="service-item" id="btnWithdrawService">
+                    <i class="fa-solid fa-hand-holding-dollar service-icon"></i>
+                    <div class="service-name">Withdraw</div>
+                </div>
+                <div class="service-item" id="btnAirtimeService">
+                    <i class="fa-solid fa-mobile-screen service-icon"></i>
+                    <div class="service-name">Airtime</div>
+                </div>
+                <div class="service-item" id="btnPayBillsService">
+                    <i class="fa-solid fa-receipt service-icon"></i>
+                    <div class="service-name">Pay Bills</div>
+                </div>
+            </div>
 
-        <button class="logout-btn" id="logoutBtn">Log Out</button>
+            <!-- Modals -->
+            <div id="sendModal" class="modal-screen">
+                <div class="section-label">💸 Send Money</div>
+                <input type="text" id="receiverPhone" placeholder="Recipient Phone Number">
+                <input type="number" id="sendAmount" placeholder="Amount (RWF)">
+                <button id="sendMoneyBtn">Send Money Now</button>
+            </div>
+
+            <div id="withdrawModal" class="modal-screen">
+                <div class="section-label">🏧 Request Cash Withdrawal</div>
+                <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw (RWF)">
+                <button id="withdrawBtn" style="background: #ff9800;">Submit Withdrawal Request</button>
+            </div>
+
+            <div id="airtimeModal" class="modal-screen">
+                <div class="section-label">📱 Buy Airtime</div>
+                <select id="airtimeProvider">
+                    <option value="MTN">MTN Rwanda</option>
+                    <option value="Airtel">Airtel Rwanda</option>
+                </select>
+                <input type="text" id="airtimePhone" placeholder="Target Phone Number">
+                <input type="number" id="airtimeAmount" placeholder="Amount (RWF)">
+                <button id="buyAirtimeBtn" style="background: #28a745;">Buy Airtime</button>
+            </div>
+
+            <div id="billsModal" class="modal-screen">
+                <div class="section-label">📄 Pay Utility Bills</div>
+                <select id="billType">
+                    <option value="EUCL Cash Power">EUCL Cash Power</option>
+                    <option value="WASAC Water">WASAC Water</option>
+                    <option value="Canal+ Subscription">Canal+ Subscription</option>
+                </select>
+                <input type="text" id="billAccount" placeholder="Meter / Account Number">
+                <input type="number" id="billAmount" placeholder="Amount (RWF)">
+                <button id="payBillBtn" style="background: #17a2b8;">Pay Bill Now</button>
+            </div>
+
+            <div id="securityModal" class="modal-screen">
+                <div class="section-label">🔑 Security (Reset PIN Code)</div>
+                <button id="sendCodeBtn" style="background: #6c757d;">Send Verification OTP to Email</button>
+                <div id="otpBox" style="display:none;">
+                    <input type="text" id="inputOtp" placeholder="Enter Email Verification Code">
+                    <input type="password" id="newPinCode" maxlength="4" placeholder="New 4-Digit PIN">
+                    <button id="confirmPinBtn" style="background: #28a745;">Confirm New PIN</button>
+                </div>
+            </div>
+
+            <div class="section-label">Recent Transactions</div>
+            <div id="recordsList">
+                <p style="color: #777; font-size: 12px; text-align: center;">No activity yet...</p>
+            </div>
+
+        </div>
     </div>
+
 </div>
 
 <!-- Firebase SDKs -->
@@ -133,27 +222,36 @@
     let currentUser = null;
     let generatedOtp = null;
 
-    // Tabs Switch Logic
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    document.getElementById("openMenuBtn").addEventListener("click", () => {
+        sidebar.classList.add("active");
+        overlay.style.display = "block";
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("active");
+        overlay.style.display = "none";
+    });
+
     const loginTab = document.getElementById("loginTab");
     const regTab = document.getElementById("regTab");
-    const loginForm = document.getElementById("loginForm");
-    const registerForm = document.getElementById("registerForm");
 
     loginTab.addEventListener("click", () => {
         loginTab.classList.add("active");
         regTab.classList.remove("active");
-        loginForm.style.display = "block";
-        registerForm.style.display = "none";
+        document.getElementById("loginForm").style.display = "block";
+        document.getElementById("registerForm").style.display = "none";
     });
 
     regTab.addEventListener("click", () => {
         regTab.classList.add("active");
         loginTab.classList.remove("active");
-        registerForm.style.display = "block";
-        loginForm.style.display = "none";
+        document.getElementById("registerForm").style.display = "block";
+        document.getElementById("loginForm").style.display = "none";
     });
 
-    // Registration Action
     document.getElementById("registerBtn").addEventListener("click", async () => {
         const name = document.getElementById("regName").value.trim();
         const email = document.getElementById("regEmail").value.trim();
@@ -161,7 +259,7 @@
         const pin = document.getElementById("regPin").value.trim();
 
         if (!name || !email || !phone || pin.length !== 4) {
-            alert("Please fill in all details and enter a 4-digit PIN!");
+            alert("Fill in all details correctly!");
             return;
         }
 
@@ -169,7 +267,7 @@
         const docSnap = await getDoc(userRef);
 
         if (docSnap.exists()) {
-            alert("This phone number is already registered. Please login!");
+            alert("Phone number is already registered!");
         } else {
             await setDoc(userRef, {
                 fullName: name,
@@ -178,19 +276,18 @@
                 balance: 0,
                 history: []
             });
-            alert("Account registered successfully! You can now log in.");
+            alert("Account created successfully!");
             loginTab.click();
             document.getElementById("loginPhone").value = phone;
         }
     });
 
-    // Login Action
     document.getElementById("loginBtn").addEventListener("click", async () => {
         const phone = document.getElementById("loginPhone").value.trim();
         const pin = document.getElementById("loginPin").value.trim();
 
         if (!phone || !pin) {
-            alert("Please enter phone number and PIN.");
+            alert("Enter both phone number and PIN!");
             return;
         }
 
@@ -201,14 +298,13 @@
             const data = docSnap.data();
             if (data.pin && data.pin === pin) {
                 currentUser = { phone, ...data };
-                document.getElementById("accNo").innerText = phone;
-                document.getElementById("userFullName").innerText = data.fullName || "Valued Customer";
-                document.getElementById("authTabs").style.display = "none";
-                loginForm.style.display = "none";
-                registerForm.style.display = "none";
-                document.getElementById("accountDisplay").style.display = "block";
+                document.getElementById("accNoDisplay").innerText = phone;
+                document.getElementById("sideName").innerText = data.fullName || "User";
+                document.getElementById("sideEmail").innerText = data.email || "";
 
-                // Real-time Updates Listener
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("dashboardScreen").style.display = "block";
+
                 if (unsubscribe) unsubscribe();
                 unsubscribe = onSnapshot(userRef, (snapshot) => {
                     if (snapshot.exists()) {
@@ -218,44 +314,49 @@
                         
                         if (updated.history && updated.history.length > 0) {
                             let html = "";
-                            [...updated.history].reverse().forEach(rec => {
-                                const color = rec.type === "Received" || rec.type === "TopUp" ? "green" : "red";
-                                html += `<div class="record-item">
-                                    <div><strong>${rec.type}</strong><br><small style="color:#666;">${rec.time}</small></div>
-                                    <div style="color:${color}; font-weight:bold;">${rec.amount > 0 ? '+' : ''}${rec.amount.toLocaleString()} RWF</div>
+                            [...updated.history].reverse().forEach((rec, idx) => {
+                                const isPos = rec.amount > 0;
+                                html += `<div class="record-card">
+                                    <div>
+                                        <strong>${rec.type}</strong><br>
+                                        <small style="color:#888;">${rec.time}</small>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <div style="color:${isPos ? 'green' : 'red'}; font-weight:bold;">${isPos ? '+' : ''}${rec.amount.toLocaleString()} RWF</div>
+                                        <button class="receipt-btn" onclick="alert('PAYTAKE RECEIPT\\nType: ${rec.type}\\nAmount: ${rec.amount} RWF\\nTime: ${rec.time}')">Receipt</button>
+                                    </div>
                                 </div>`;
                             });
                             document.getElementById("recordsList").innerHTML = html;
                         } else {
-                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px;">No activity yet...</p>';
+                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px; text-align: center;">No activity yet...</p>';
                         }
                     }
                 });
             } else {
-                alert("Incorrect PIN! Please try again.");
+                alert("Incorrect PIN!");
             }
         } else {
-            alert("Account not found. Please Register first.");
+            alert("Account not found!");
         }
     });
 
-    // 1. Transfer Money Logic
+    function hideModals() {
+        document.querySelectorAll('.modal-screen').forEach(m => m.style.display = 'none');
+    }
+
+    document.getElementById("btnSendService").addEventListener("click", () => { hideModals(); document.getElementById("sendModal").style.display = "block"; });
+    document.getElementById("btnWithdrawService").addEventListener("click", () => { hideModals(); document.getElementById("withdrawModal").style.display = "block"; });
+    document.getElementById("btnAirtimeService").addEventListener("click", () => { hideModals(); document.getElementById("airtimeModal").style.display = "block"; });
+    document.getElementById("btnPayBillsService").addEventListener("click", () => { hideModals(); document.getElementById("billsModal").style.display = "block"; });
+    document.getElementById("menuSecBtn").addEventListener("click", () => { sidebar.classList.remove("active"); overlay.style.display = "none"; hideModals(); document.getElementById("securityModal").style.display = "block"; });
+
     document.getElementById("sendMoneyBtn").addEventListener("click", async () => {
         const targetPhone = document.getElementById("receiverPhone").value.trim();
         const amount = parseFloat(document.getElementById("sendAmount").value);
 
-        if (!targetPhone || isNaN(amount) || amount <= 0) {
-            alert("Enter valid target phone number and transfer amount!");
-            return;
-        }
-
-        if (targetPhone === currentUser.phone) {
-            alert("You cannot transfer money to your own account!");
-            return;
-        }
-
-        if ((currentUser.balance || 0) < amount) {
-            alert("Insufficient Balance for this transfer!");
+        if (!targetPhone || isNaN(amount) || amount <= 0 || (currentUser.balance || 0) < amount) {
+            alert("Invalid transfer details or insufficient balance!");
             return;
         }
 
@@ -263,101 +364,28 @@
         const receiverDoc = await getDoc(receiverRef);
 
         if (!receiverDoc.exists()) {
-            alert("Target receiver account does not exist!");
+            alert("Recipient account does not exist!");
             return;
         }
 
         const timeNow = new Date().toLocaleTimeString();
 
-        // Deduct from Sender
-        const senderRef = doc(db, "accounts", currentUser.phone);
-        await updateDoc(senderRef, {
+        await updateDoc(doc(db, "accounts", currentUser.phone), {
             balance: currentUser.balance - amount,
             history: arrayUnion({ type: "Sent to " + targetPhone, amount: -amount, time: timeNow })
         });
 
-        // Add to Receiver
-        const recBalance = receiverDoc.data().balance || 0;
         await updateDoc(receiverRef, {
-            balance: recBalance + amount,
+            balance: (receiverDoc.data().balance || 0) + amount,
             history: arrayUnion({ type: "Received from " + currentUser.phone, amount: amount, time: timeNow })
         });
 
-        alert("Successfully transferred " + amount + " RWF to " + targetPhone);
-        document.getElementById("receiverPhone").value = "";
-        document.getElementById("sendAmount").value = "";
+        alert("Transferred " + amount + " RWF successfully!");
+        hideModals();
     });
 
-    // 2. Withdrawal Request Logic
     document.getElementById("withdrawBtn").addEventListener("click", async () => {
         const amount = parseFloat(document.getElementById("withdrawAmount").value);
-
-        if (isNaN(amount) || amount <= 0) {
-            alert("Enter a valid amount to withdraw!");
-            return;
-        }
-
-        if ((currentUser.balance || 0) < amount) {
-            alert("Insufficient Balance!");
-            return;
-        }
-
-        const timeNow = new Date().toLocaleTimeString();
-        const senderRef = doc(db, "accounts", currentUser.phone);
-
-        await updateDoc(senderRef, {
-            balance: currentUser.balance - amount,
-            history: arrayUnion({ type: "Withdrawal Request", amount: -amount, time: timeNow })
-        });
-
-        alert("Withdrawal request submitted for " + amount + " RWF. Admin will process your cash!");
-        document.getElementById("withdrawAmount").value = "";
-    });
-
-    // 3. Email Verification for PIN Change
-    document.getElementById("sendCodeBtn").addEventListener("click", () => {
-        if (!currentUser.email) {
-            alert("No email associated with this account!");
-            return;
-        }
-
-        generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-        alert("SECURITY CODE: Your OTP verification code is: " + generatedOtp + "\n(Code simulated for " + currentUser.email + ")");
-        document.getElementById("verificationFields").style.display = "block";
-    });
-
-    document.getElementById("confirmPinBtn").addEventListener("click", async () => {
-        const inputOtp = document.getElementById("inputOtp").value.trim();
-        const newPin = document.getElementById("newPin").value.trim();
-
-        if (inputOtp !== generatedOtp) {
-            alert("Invalid Email Verification Code (OTP)!");
-            return;
-        }
-
-        if (newPin.length !== 4) {
-            alert("New PIN must be exactly 4 digits!");
-            return;
-        }
-
-        const userRef = doc(db, "accounts", currentUser.phone);
-        await updateDoc(userRef, { pin: newPin });
-
-        alert("Your Security PIN has been updated successfully!");
-        document.getElementById("verificationFields").style.display = "none";
-        document.getElementById("inputOtp").value = "";
-        document.getElementById("newPin").value = "";
-    });
-
-    // Logout Action
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        if (unsubscribe) unsubscribe();
-        document.getElementById("authTabs").style.display = "flex";
-        loginTab.click();
-        document.getElementById("accountDisplay").style.display = "none";
-        document.getElementById("loginPin").value = "";
-    });
-</script>
-
-</body>
-</html>
+        if (isNaN(amount) || amount <= 0 || (currentUser.balance || 0) < amount) {
+            alert("Invalid withdrawal amount or insufficient balance!");
+     
