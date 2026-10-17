@@ -4,72 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAYTAKE - Global FinTech Portal</title>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f0f2f5; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { background: white; width: 100%; max-width: 420px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: hidden; min-height: 100vh; }
+        .app-container { background: white; width: 100%; max-width: 420px; position: relative; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow-x: hidden; min-height: 100vh; }
         
+        /* Auth Screen */
         .auth-card { padding: 30px 20px; }
         .auth-header { text-align: center; margin-bottom: 25px; }
-        .auth-header h2 { color: #1976d2; font-size: 26px; font-weight: bold; }
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
-        .tab { flex: 1; text-align: center; padding: 10px; font-weight: bold; color: #777; cursor: pointer; }
-        .tab.active { color: #1976d2; border-bottom: 3px solid #1976d2; }
-        input, select { width: 100%; padding: 12px; margin: 6px 0 14px 0; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; font-size: 14px; }
-        button { width: 100%; padding: 13px; background: #1976d2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; margin-bottom: 8px; }
+        .auth-header h2 { color: #1976d2; font-size: 28px; font-weight: 800; letter-spacing: 0.5px; }
+        .auth-header p { font-size: 13px; color: #666; margin-top: 4px; }
         
-        .top-bar { background: #1976d2; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab { flex: 1; text-align: center; padding: 12px; font-weight: bold; color: #777; cursor: pointer; transition: 0.2s; }
+        .tab.active { color: #1976d2; border-bottom: 3px solid #1976d2; }
+        
+        input, select { width: 100%; padding: 12px; margin: 6px 0 14px 0; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; font-size: 14px; outline: none; }
+        input:focus, select:focus { border-color: #1976d2; background: #fff; }
+        button { width: 100%; padding: 13px; background: #1976d2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; margin-bottom: 8px; transition: 0.2s; }
+        button:hover { opacity: 0.95; }
+        
+        .phone-group { display: flex; gap: 8px; }
+        .country-select { width: 42%; font-size: 13px; }
+
+        /* Welcome Banner & Top Bar */
+        .top-bar { background: #1976d2; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .top-bar .icon-btn { font-size: 20px; cursor: pointer; }
-        .top-bar .brand-title { font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+        .top-bar .brand-title { font-weight: bold; font-size: 19px; letter-spacing: 1px; }
+
+        .welcome-banner { background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; border: 1px solid #90caf9; }
+        .welcome-banner i { font-size: 24px; color: #1976d2; }
+        .welcome-banner div { font-size: 12px; color: #0d47a1; font-weight: 600; line-height: 1.4; }
 
         .dashboard-body { padding: 20px; }
-        .balance-card { background: linear-gradient(135deg, #1976d2, #0d47a1); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 8px 16px rgba(25, 118, 210, 0.25); margin-bottom: 20px; }
+        .balance-card { background: linear-gradient(135deg, #1976d2, #0d47a1); color: white; padding: 22px 20px; border-radius: 16px; box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3); margin-bottom: 20px; position: relative; }
         .balance-header { display: flex; justify-content: space-between; align-items: center; }
-        .balance-title { font-size: 12px; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
-        .balance-val { font-size: 28px; font-weight: bold; margin: 10px 0; }
+        .balance-title { font-size: 12px; text-transform: uppercase; opacity: 0.85; letter-spacing: 1px; font-weight: 600; }
+        .balance-val { font-size: 30px; font-weight: 800; margin: 10px 0; letter-spacing: 0.5px; }
         .acc-info { font-size: 12px; opacity: 0.9; }
 
-        .section-label { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
-        .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .service-item { background: #f8f9fa; border-radius: 12px; padding: 14px 5px; text-align: center; cursor: pointer; border: 1px solid #eef0f2; }
-        .service-item:hover { background: #eef5ff; border-color: #1976d2; }
-        .service-icon { font-size: 20px; color: #1976d2; margin-bottom: 6px; }
-        .service-name { font-size: 11px; font-weight: 600; color: #444; }
+        /* Services Grid Layout */
+        .section-label { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px; }
+        .service-item { background: #f8f9fa; border-radius: 14px; padding: 16px 8px; text-align: center; cursor: pointer; border: 1px solid #eef0f2; transition: all 0.2s ease; }
+        .service-item:hover { background: #eef5ff; border-color: #1976d2; transform: translateY(-2px); }
+        .service-icon { font-size: 22px; color: #1976d2; margin-bottom: 8px; }
+        .service-name { font-size: 12px; font-weight: 600; color: #333; }
 
+        /* Sidebar Navigation Drawer */
         .sidebar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
         .sidebar { position: absolute; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 100; transition: 0.3s ease; display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
         .sidebar-header { background: #1976d2; color: white; padding: 25px 20px; }
         .sidebar-menu { list-style: none; padding: 15px 0; flex: 1; }
         .sidebar-menu li { padding: 14px 20px; font-size: 14px; font-weight: 600; color: #444; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .sidebar-menu li:hover { background: #f0f4f9; color: #1976d2; }
 
-        .modal-screen { display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; }
-        .record-card { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9fbfd; border-radius: 8px; margin-bottom: 8px; font-size: 13px; border-left: 4px solid #1976d2; }
+        /* Modals & Receipts */
+        .modal-screen { display: none; background: white; padding: 18px; border-radius: 14px; border: 1px solid #e0e0e0; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .record-card { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #f9fbfd; border-radius: 10px; margin-bottom: 10px; font-size: 13px; border-left: 4px solid #1976d2; }
+        .receipt-btn { background: #6c757d; font-size: 11px; padding: 5px 10px; width: auto; margin: 0; border-radius: 6px; }
+
+        /* Receipt Modal Popup */
+        .receipt-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; display: none; justify-content: center; align-items: center; }
+        .receipt-box { background: white; width: 90%; max-width: 340px; padding: 24px; border-radius: 16px; text-align: center; }
+        .receipt-title { font-size: 19px; font-weight: 800; color: #1976d2; margin-bottom: 15px; }
+        .receipt-row { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px dashed #e0e0e0; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
 
+    <!-- Sidebar Overlay & Menu Drawer -->
     <div id="overlay" class="sidebar-overlay"></div>
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
-            <i class="fa-solid fa-user-circle" style="font-size: 40px; margin-bottom: 10px;"></i>
+            <i class="fa-solid fa-circle-user" style="font-size: 44px; margin-bottom: 10px;"></i>
             <h4 id="sideName">User Name</h4>
-            <p id="sideEmail" style="font-size: 12px; opacity: 0.8;">user@email.com</p>
+            <p id="sideEmail" style="font-size: 12px; opacity: 0.85;">user@email.com</p>
+            <p id="sideCountry" style="font-size: 11px; opacity: 0.9; margin-top: 4px; font-weight: bold;">🇷🇼 Rwanda (+250)</p>
         </div>
         <ul class="sidebar-menu">
-            <li id="menuSecBtn"><i class="fa-solid fa-shield-halved" style="color:#1976d2;"></i> Security (Reset PIN)</li>
+            <li id="menuSecBtn"><i class="fa-solid fa-shield-halved" style="color:#1976d2;"></i> Reset Security PIN</li>
             <li id="menuLogout" style="color: #d32f2f;"><i class="fa-solid fa-right-from-bracket" style="color:#d32f2f;"></i> Log Out</li>
         </ul>
+    </div>
+
+    <!-- Receipt Modal Popup -->
+    <div id="receiptModal" class="receipt-modal-overlay">
+        <div class="receipt-box">
+            <div class="receipt-title">PAYTAKE RECEIPT 🧾</div>
+            <div class="receipt-row"><span>Type:</span><strong id="rType">-</strong></div>
+            <div class="receipt-row"><span>Amount:</span><strong id="rAmount">-</strong></div>
+            <div class="receipt-row"><span>Time:</span><strong id="rTime">-</strong></div>
+            <div class="receipt-row"><span>Status:</span><strong style="color:green;">SUCCESSFUL</strong></div>
+            <button id="closeReceiptBtn" style="margin-top: 18px; background: #333;">Close Receipt</button>
+        </div>
     </div>
 
     <!-- Auth Screen -->
     <div id="authScreen" class="auth-card">
         <div class="auth-header">
             <h2>PAYTAKE 🔒</h2>
-            <p style="font-size: 13px; color: #666;">Global Financial Services</p>
+            <p>Smart, Secure & Seamless Global Payments</p>
         </div>
 
         <div id="authTabs" class="tabs">
@@ -77,30 +117,46 @@
             <span id="regTab" class="tab">Register</span>
         </div>
 
+        <!-- Sign In Form -->
         <div id="loginForm">
             <label style="font-size: 12px; font-weight: bold;">Phone Number</label>
-            <input type="text" id="loginPhone" placeholder="078XXXXXXX">
+            <input type="text" id="loginPhone" placeholder="078XXXXXXX or Full Phone Number">
 
-            <label style="font-size: 12px; font-weight: bold;">4-Digit PIN</label>
+            <label style="font-size: 12px; font-weight: bold;">4-Digit Security PIN</label>
             <input type="password" id="loginPin" maxlength="4" placeholder="****">
 
-            <button id="loginBtn">Log In</button>
+            <button id="loginBtn">Sign In to Account</button>
         </div>
 
+        <!-- Full Self-Registration Form -->
         <div id="registerForm" style="display: none;">
             <label style="font-size: 12px; font-weight: bold;">Full Name</label>
-            <input type="text" id="regName" placeholder="Jean Damour">
+            <input type="text" id="regName" placeholder="e.g. Jean Damour">
 
             <label style="font-size: 12px; font-weight: bold;">Email Address</label>
             <input type="email" id="regEmail" placeholder="name@example.com">
 
-            <label style="font-size: 12px; font-weight: bold;">Phone Number</label>
-            <input type="text" id="regPhone" placeholder="078XXXXXXX">
+            <label style="font-size: 12px; font-weight: bold;">Country & Mobile Number</label>
+            <div class="phone-group">
+                <select id="regCountry" class="country-select">
+                    <option value="+250">🇷🇼 Rwanda (+250)</option>
+                    <option value="+254">🇰🇪 Kenya (+254)</option>
+                    <option value="+256">🇺🇬 Uganda (+256)</option>
+                    <option value="+255">🇹🇿 Tanzania (+255)</option>
+                    <option value="+1">🇺🇸 USA (+1)</option>
+                    <option value="+33">🇫🇷 France (+33)</option>
+                    <option value="+32">🇧🇪 Belgium (+32)</option>
+                    <option value="+971">🇦🇪 UAE / Dubai (+971)</option>
+                    <option value="+44">🇬🇧 UK (+44)</option>
+                    <option value="+1">🇨🇦 Canada (+1)</option>
+                </select>
+                <input type="text" id="regPhone" placeholder="788XXXXXX">
+            </div>
 
-            <label style="font-size: 12px; font-weight: bold;">Create 4-Digit PIN</label>
+            <label style="font-size: 12px; font-weight: bold;">Create 4-Digit Security PIN</label>
             <input type="password" id="regPin" maxlength="4" placeholder="****">
 
-            <button id="registerBtn" style="background: #28a745;">Create Account</button>
+            <button id="registerBtn" style="background: #28a745;">Create Global Account</button>
         </div>
     </div>
 
@@ -110,25 +166,37 @@
         <div class="top-bar">
             <i class="fa-solid fa-bars icon-btn" id="openMenuBtn"></i>
             <span class="brand-title">PAYTAKE</span>
-            <i class="fa-solid fa-user-circle icon-btn"></i>
+            <i class="fa-solid fa-circle-user icon-btn"></i>
         </div>
 
         <div class="dashboard-body">
             
+            <!-- Warm Customer Greeting Banner -->
+            <div class="welcome-banner">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+                <div>Welcome back! Your finances are safe, fast, and accessible 24/7.</div>
+            </div>
+
+            <!-- Balance Card -->
             <div class="balance-card">
                 <div class="balance-header">
-                    <span class="balance-title">Total Balance</span>
+                    <span class="balance-title">Available Balance</span>
                     <i class="fa-solid fa-eye icon-btn" id="toggleBalanceEye"></i>
                 </div>
                 <div class="balance-val" id="clientBalance">0 RWF</div>
-                <div class="acc-info">Account: <span id="accNoDisplay">-</span></div>
+                <div class="acc-info">Account Number: <span id="accNoDisplay">-</span></div>
             </div>
 
-            <div class="section-label">Services</div>
+            <!-- Comprehensive 6 Services Grid -->
+            <div class="section-label">
+                <span>Quick Services</span>
+                <small style="color:#1976d2; font-size:11px; font-weight:600;">Instant & Secure</small>
+            </div>
+            
             <div class="services-grid">
                 <div class="service-item" id="btnSendService">
                     <i class="fa-solid fa-paper-plane service-icon"></i>
-                    <div class="service-name">Send</div>
+                    <div class="service-name">Send Money</div>
                 </div>
                 <div class="service-item" id="btnWithdrawService">
                     <i class="fa-solid fa-hand-holding-dollar service-icon"></i>
@@ -136,36 +204,47 @@
                 </div>
                 <div class="service-item" id="btnAirtimeService">
                     <i class="fa-solid fa-mobile-screen service-icon"></i>
-                    <div class="service-name">Airtime</div>
+                    <div class="service-name">Airtime/Data</div>
                 </div>
                 <div class="service-item" id="btnPayBillsService">
-                    <i class="fa-solid fa-receipt service-icon"></i>
+                    <i class="fa-solid fa-file-invoice-dollar service-icon"></i>
                     <div class="service-name">Pay Bills</div>
+                </div>
+                <div class="service-item" id="btnCardService">
+                    <i class="fa-solid fa-credit-card service-icon"></i>
+                    <div class="service-name">Virtual Card</div>
+                </div>
+                <div class="service-item" id="btnBankService">
+                    <i class="fa-solid fa-building-columns service-icon"></i>
+                    <div class="service-name">Bank Transfer</div>
                 </div>
             </div>
 
+            <!-- Service Input Forms / Modals -->
             <div id="sendModal" class="modal-screen">
-                <div class="section-label">💸 Send Money</div>
+                <div class="section-label">💸 Send Money (P2P Transfer)</div>
                 <input type="text" id="receiverPhone" placeholder="Recipient Phone Number">
                 <input type="number" id="sendAmount" placeholder="Amount (RWF)">
-                <button id="sendMoneyBtn">Send Money Now</button>
+                <button id="sendMoneyBtn">Confirm & Send Money</button>
             </div>
 
             <div id="withdrawModal" class="modal-screen">
                 <div class="section-label">🏧 Request Cash Withdrawal</div>
                 <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw (RWF)">
-                <button id="withdrawBtn" style="background: #ff9800;">Submit Withdrawal Request</button>
+                <button id="withdrawBtn" style="background: #ff9800;">Submit Cash Request</button>
             </div>
 
             <div id="airtimeModal" class="modal-screen">
-                <div class="section-label">📱 Buy Airtime</div>
+                <div class="section-label">📱 Airtime & Internet Bundles</div>
                 <select id="airtimeProvider">
-                    <option value="MTN">MTN Rwanda</option>
-                    <option value="Airtel">Airtel Rwanda</option>
+                    <option value="MTN Rwanda">MTN Rwanda</option>
+                    <option value="Airtel Rwanda">Airtel Rwanda</option>
+                    <option value="Safaricom Kenya">Safaricom Kenya</option>
+                    <option value="Vodacom Tanzania">Vodacom Tanzania</option>
                 </select>
                 <input type="text" id="airtimePhone" placeholder="Target Phone Number">
                 <input type="number" id="airtimeAmount" placeholder="Amount (RWF)">
-                <button id="buyAirtimeBtn" style="background: #28a745;">Buy Airtime</button>
+                <button id="buyAirtimeBtn" style="background: #28a745;">Buy Airtime Now</button>
             </div>
 
             <div id="billsModal" class="modal-screen">
@@ -174,25 +253,47 @@
                     <option value="EUCL Cash Power">EUCL Cash Power</option>
                     <option value="WASAC Water">WASAC Water</option>
                     <option value="Canal+ Subscription">Canal+ Subscription</option>
+                    <option value="DSTV Subscription">DSTV Subscription</option>
+                    <option value="StarTimes TV">StarTimes TV</option>
                 </select>
-                <input type="text" id="billAccount" placeholder="Meter / Account Number">
+                <input type="text" id="billAccount" placeholder="Meter / Card Number">
                 <input type="number" id="billAmount" placeholder="Amount (RWF)">
-                <button id="payBillBtn" style="background: #17a2b8;">Pay Bill Now</button>
+                <button id="payBillBtn" style="background: #17a2b8;">Process Bill Payment</button>
+            </div>
+
+            <div id="cardModal" class="modal-screen">
+                <div class="section-label">💳 PAYTAKE Virtual Visa Card</div>
+                <p style="font-size: 12px; color: #555; margin-bottom: 12px;">Create an instant USD virtual card for shopping online (Amazon, Netflix, Google Play).</p>
+                <button onclick="alert('Virtual Card feature is currently under final verification!')" style="background: #6f42c1;">Request Virtual Card</button>
+            </div>
+
+            <div id="bankModal" class="modal-screen">
+                <div class="section-label">🏦 Bank Account Deposit</div>
+                <select id="bankName">
+                    <option value="BK (Bank of Kigali)">BK (Bank of Kigali)</option>
+                    <option value="Equity Bank">Equity Bank Rwanda</option>
+                    <option value="I&M Bank">I&M Bank</option>
+                    <option value="Zigama CSS">Zigama CSS</option>
+                </select>
+                <input type="text" id="bankAccNo" placeholder="Bank Account Number">
+                <input type="number" id="bankAmount" placeholder="Amount (RWF)">
+                <button onclick="alert('Bank Transfer Request Submitted for Processing!')" style="background: #20c997;">Send to Bank Account</button>
             </div>
 
             <div id="securityModal" class="modal-screen">
-                <div class="section-label">🔑 Change PIN (Email Verification)</div>
-                <button id="sendCodeBtn" style="background: #6c757d;">1. Send Verification OTP Code</button>
+                <div class="section-label">🔑 Security (Reset PIN Code)</div>
+                <button id="sendCodeBtn" style="background: #6c757d;">1. Send Verification OTP to Email</button>
                 <div id="otpBox" style="display:none; margin-top: 10px;">
-                    <input type="text" id="inputOtp" placeholder="Enter Email Verification Code">
+                    <input type="text" id="inputOtp" placeholder="Enter Email Verification OTP">
                     <input type="password" id="newPinCode" maxlength="4" placeholder="New 4-Digit PIN">
                     <button id="confirmPinBtn" style="background: #28a745;">2. Confirm New PIN</button>
                 </div>
             </div>
 
-            <div class="section-label">Recent Transactions</div>
+            <!-- Transactions Ledger -->
+            <div class="section-label">Recent Activity Ledger</div>
             <div id="recordsList">
-                <p style="color: #777; font-size: 12px; text-align: center;">No activity yet...</p>
+                <p style="color: #777; font-size: 12px; text-align: center;">No activity recorded yet...</p>
             </div>
 
         </div>
@@ -200,6 +301,7 @@
 
 </div>
 
+<!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -255,128 +357,4 @@
     loginTab.onclick = () => {
         loginTab.classList.add("active");
         regTab.classList.remove("active");
-        document.getElementById("loginForm").style.display = "block";
-        document.getElementById("registerForm").style.display = "none";
-    };
-
-    regTab.onclick = () => {
-        regTab.classList.add("active");
-        loginTab.classList.remove("active");
-        document.getElementById("registerForm").style.display = "block";
-        document.getElementById("loginForm").style.display = "none";
-    };
-
-    document.getElementById("registerBtn").onclick = async () => {
-        const name = document.getElementById("regName").value.trim();
-        const email = document.getElementById("regEmail").value.trim();
-        const phone = document.getElementById("regPhone").value.trim();
-        const pin = document.getElementById("regPin").value.trim();
-
-        if (!name || !email || !phone || pin.length !== 4) {
-            alert("Please fill in all details correctly!");
-            return;
-        }
-
-        const userRef = doc(db, "accounts", phone);
-        const docSnap = await getDoc(userRef);
-
-        if (docSnap.exists()) {
-            alert("Phone number is already registered!");
-        } else {
-            await setDoc(userRef, { fullName: name, email: email, pin: pin, balance: 0, history: [] });
-            alert("Account created successfully! Please sign in.");
-            loginTab.click();
-            document.getElementById("loginPhone").value = phone;
-        }
-    };
-
-    document.getElementById("loginBtn").onclick = async () => {
-        const phone = document.getElementById("loginPhone").value.trim();
-        const pin = document.getElementById("loginPin").value.trim();
-
-        if (!phone || !pin) {
-            alert("Please enter both phone number and PIN!");
-            return;
-        }
-
-        const userRef = doc(db, "accounts", phone);
-        const docSnap = await getDoc(userRef);
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.pin && data.pin === pin) {
-                currentUser = { phone, ...data };
-                document.getElementById("accNoDisplay").innerText = phone;
-                document.getElementById("sideName").innerText = data.fullName || "User";
-                document.getElementById("sideEmail").innerText = data.email || "";
-
-                document.getElementById("authScreen").style.display = "none";
-                document.getElementById("dashboardScreen").style.display = "block";
-
-                if (unsubscribe) unsubscribe();
-                unsubscribe = onSnapshot(userRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const updated = snapshot.data();
-                        rawBalance = updated.balance || 0;
-                        if (!isBalanceHidden) {
-                            document.getElementById("clientBalance").innerText = rawBalance.toLocaleString() + " RWF";
-                        }
-                        if (updated.history && updated.history.length > 0) {
-                            let html = "";
-                            [...updated.history].reverse().forEach((rec) => {
-                                const isPos = rec.amount > 0;
-                                html += `<div class="record-card">
-                                    <div><strong>${rec.type}</strong><br><small style="color:#888;">${rec.time}</small></div>
-                                    <div style="color:${isPos ? 'green' : 'red'}; font-weight:bold;">${isPos ? '+' : ''}${rec.amount.toLocaleString()} RWF</div>
-                                </div>`;
-                            });
-                            document.getElementById("recordsList").innerHTML = html;
-                        }
-                    }
-                });
-            } else {
-                alert("Incorrect PIN!");
-            }
-        } else {
-            alert("Account not found! Please register first.");
-        }
-    };
-
-    function hideModals() {
-        document.querySelectorAll('.modal-screen').forEach(m => m.style.display = 'none');
-    }
-
-    document.getElementById("btnSendService").onclick = () => { hideModals(); document.getElementById("sendModal").style.display = "block"; };
-    document.getElementById("btnWithdrawService").onclick = () => { hideModals(); document.getElementById("withdrawModal").style.display = "block"; };
-    document.getElementById("btnAirtimeService").onclick = () => { hideModals(); document.getElementById("airtimeModal").style.display = "block"; };
-    document.getElementById("btnPayBillsService").onclick = () => { hideModals(); document.getElementById("billsModal").style.display = "block"; };
-    document.getElementById("menuSecBtn").onclick = () => { sidebar.classList.remove("active"); overlay.style.display = "none"; hideModals(); document.getElementById("securityModal").style.display = "block"; };
-
-    document.getElementById("sendMoneyBtn").onclick = async () => {
-        const targetPhone = document.getElementById("receiverPhone").value.trim();
-        const amount = parseFloat(document.getElementById("sendAmount").value);
-        if (!targetPhone || isNaN(amount) || amount <= 0 || rawBalance < amount) { alert("Invalid transfer details or insufficient balance!"); return; }
-
-        const receiverRef = doc(db, "accounts", targetPhone);
-        const receiverDoc = await getDoc(receiverRef);
-        if (!receiverDoc.exists()) { alert("Recipient account does not exist!"); return; }
-
-        const timeNow = new Date().toLocaleTimeString();
-        await updateDoc(doc(db, "accounts", currentUser.phone), { balance: rawBalance - amount, history: arrayUnion({ type: "Sent to " + targetPhone, amount: -amount, time: timeNow }) });
-        await updateDoc(receiverRef, { balance: (receiverDoc.data().balance || 0) + amount, history: arrayUnion({ type: "Received from " + currentUser.phone, amount: amount, time: timeNow }) });
-        alert("Transferred " + amount + " RWF successfully!");
-        hideModals();
-    };
-
-    document.getElementById("withdrawBtn").onclick = async () => {
-        const amount = parseFloat(document.getElementById("withdrawAmount").value);
-        if (isNaN(amount) || amount <= 0 || rawBalance < amount) { alert("Invalid amount!"); return; }
-        const timeNow = new Date().toLocaleTimeString();
-        await setDoc(doc(db, "pending_withdrawals", currentUser.phone + "_" + Date.now()), { phone: currentUser.phone, name: currentUser.fullName || "User", amount: amount, status: "Pending", time: timeNow });
-        alert("Withdrawal Request Submitted!");
-        hideModals();
-    };
-
-    document.getElementById("sendCodeBtn").onclick = () => {
-        generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-        alert(
+        document.getEl
