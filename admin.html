@@ -1,33 +1,40 @@
 <!DOCTYPE html>
-<html lang="rw">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAYTAKE - Admin Server Portal</title>
+    <title>PAYTAKE - Server Admin Portal</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: white; padding: 20px; display: flex; justify-content: center; }
-        .card { background: #2d2d2d; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #555; background: #444; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        body { font-family: Arial, sans-serif; background-color: #121212; color: white; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #1e1e1e; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 10px; margin: 6px 0 14px 0; border-radius: 6px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
+        .req-box { background: #2a2a2a; border-left: 4px solid #ff9800; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-approve { background: #28a745; padding: 6px 12px; width: auto; font-size: 12px; margin: 0; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>PAYTAKE Admin Portal ⚙️</h2>
-    <label>Nimero y'Umukiriya (Target Account):</label>
-    <input type="text" id="targetAcc" placeholder="Urugero: 078XXXXXXX">
+    <h2>PAYTAKE Admin Server Portal ⚙️</h2>
+    
+    <label>Target Account Phone Number:</label>
+    <input type="text" id="targetAcc" placeholder="078XXXXXXX">
 
-    <label>Amafaranga yo kongeraho (RWF):</label>
-    <input type="number" id="addAmount" placeholder="Andika umubare...">
+    <label>Top-Up Amount (RWF):</label>
+    <input type="number" id="addAmount" placeholder="Amount to add...">
 
-    <button id="updateBtn">Update Client Balance</button>
+    <button id="updateBtn">Credit Account Balance</button>
+
+    <h3 style="margin: 20px 0 10px 0; font-size: 16px; color: #ff9800;">Pending Withdrawal Requests</h3>
+    <div id="pendingList">
+        <p style="color: #888; font-size: 12px;">No pending requests...</p>
+    </div>
 </div>
 
-<!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDQ2-iY9iFHriHJ_hMQkMe3Jn",
@@ -43,32 +50,70 @@
 
     document.getElementById("updateBtn").addEventListener("click", async () => {
         const phone = document.getElementById("targetAcc").value.trim();
-        const amount = parseFloat(document.getElementById("addAmount").value);
+        const amount = parseFloat(document.getElementById("addAmount").value) || 0;
 
-        if (!phone || isNaN(amount)) {
-            alert("Nyamuneka andika nimero n'amafaranga neza.");
+        if (!phone || amount <= 0) {
+            alert("Enter target phone number and valid amount!");
             return;
         }
 
         const userRef = doc(db, "accounts", phone);
         const userDoc = await getDoc(userRef);
 
-        let currentBalance = 0;
-        if (userDoc.exists()) {
-            currentBalance = userDoc.data().balance || 0;
+        if (!userDoc.exists()) {
+            alert("Account does not exist!");
+            return;
         }
 
-        const newBalance = currentBalance + amount;
+        const newBalance = (userDoc.data().balance || 0) + amount;
         const timeNow = new Date().toLocaleTimeString();
 
-        await setDoc(userRef, {
+        await updateDoc(userRef, {
             balance: newBalance,
-            history: arrayUnion({ amount: amount, time: timeNow })
-        }, { merge: true });
+            history: arrayUnion({ type: "Admin TopUp", amount: amount, time: timeNow })
+        });
 
-        alert("Balance ya " + phone + " yavuguruwe neza muri Cloud!");
+        alert("Successfully credited " + amount + " RWF to " + phone);
         document.getElementById("addAmount").value = "";
     });
+
+    // Realtime Pending Requests Listener
+    onSnapshot(collection(db, "pending_withdrawals"), (snapshot) => {
+        if (!snapshot.empty) {
+            let html = "";
+            snapshot.forEach((reqDoc) => {
+                const req = reqDoc.data();
+                html += `<div class="req-box">
+                    <div>
+                        <strong>${req.name}</strong> (${req.phone})<br>
+                        <span style="color:#ff9800; font-weight:bold;">${req.amount.toLocaleString()} RWF</span>
+                    </div>
+                    <button class="btn-approve" onclick="approveWithdraw('${reqDoc.id}', '${req.phone}', ${req.amount})">Approve</button>
+                </div>`;
+            });
+            document.getElementById("pendingList").innerHTML = html;
+        } else {
+            document.getElementById("pendingList").innerHTML = '<p style="color: #888; font-size: 12px;">No pending requests...</p>';
+        }
+    });
+
+    window.approveWithdraw = async (reqId, phone, amount) => {
+        const userRef = doc(db, "accounts", phone);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            const currentBal = userDoc.data().balance || 0;
+            const timeNow = new Date().toLocaleTimeString();
+
+            await updateDoc(userRef, {
+                balance: currentBal - amount,
+                history: arrayUnion({ type: "Approved Withdrawal", amount: -amount, time: timeNow })
+            });
+
+            await deleteDoc(doc(db, "pending_withdrawals", reqId));
+            alert("Approved withdrawal of " + amount + " RWF for " + phone);
+        }
+    };
 </script>
 
 </body>
