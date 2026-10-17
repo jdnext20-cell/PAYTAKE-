@@ -10,34 +10,40 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f0f2f5; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { background: white; width: 100%; max-width: 420px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: hidden; }
+        .app-container { background: white; width: 100%; max-width: 420px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow-x: hidden; min-height: 100vh; }
         
+        /* Auth Screen */
         .auth-card { padding: 30px 20px; }
         .auth-header { text-align: center; margin-bottom: 25px; }
-        .auth-header h2 { color: #1976d2; font-size: 24px; }
+        .auth-header h2 { color: #1976d2; font-size: 26px; font-weight: bold; }
         .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
         .tab { flex: 1; text-align: center; padding: 10px; font-weight: bold; color: #777; cursor: pointer; }
         .tab.active { color: #1976d2; border-bottom: 3px solid #1976d2; }
         input, select { width: 100%; padding: 12px; margin: 6px 0 14px 0; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; font-size: 14px; }
-        button { width: 100%; padding: 12px; background: #1976d2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
+        button { width: 100%; padding: 13px; background: #1976d2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; margin-bottom: 8px; }
         
+        /* Dashboard Top Bar */
         .top-bar { background: #1976d2; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
         .top-bar .icon-btn { font-size: 20px; cursor: pointer; }
         .top-bar .brand-title { font-weight: bold; font-size: 18px; letter-spacing: 1px; }
 
+        /* Balance Card */
         .dashboard-body { padding: 20px; }
-        .balance-card { background: linear-gradient(135deg, #1976d2, #0d47a1); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 8px 16px rgba(25, 118, 210, 0.25); margin-bottom: 20px; }
+        .balance-card { background: linear-gradient(135deg, #1976d2, #0d47a1); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 8px 16px rgba(25, 118, 210, 0.25); margin-bottom: 20px; position: relative; }
+        .balance-header { display: flex; justify-content: space-between; align-items: center; }
         .balance-title { font-size: 12px; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
-        .balance-val { font-size: 28px; font-weight: bold; margin: 8px 0; }
+        .balance-val { font-size: 28px; font-weight: bold; margin: 10px 0; }
         .acc-info { font-size: 12px; opacity: 0.9; }
 
+        /* Services Grid */
         .section-label { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
         .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .service-item { background: #f8f9fa; border-radius: 12px; padding: 12px 5px; text-align: center; cursor: pointer; border: 1px solid #eef0f2; }
+        .service-item { background: #f8f9fa; border-radius: 12px; padding: 14px 5px; text-align: center; cursor: pointer; border: 1px solid #eef0f2; transition: 0.2s; }
         .service-item:hover { background: #eef5ff; border-color: #1976d2; }
-        .service-icon { font-size: 20px; color: #1976d2; margin-bottom: 5px; }
+        .service-icon { font-size: 20px; color: #1976d2; margin-bottom: 6px; }
         .service-name { font-size: 11px; font-weight: 600; color: #444; }
 
+        /* Sidebar Navigation Drawer */
         .sidebar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
         .sidebar { position: absolute; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 100; transition: 0.3s ease; display: flex; flex-direction: column; }
         .sidebar.active { left: 0; }
@@ -46,15 +52,23 @@
         .sidebar-menu li { padding: 14px 20px; font-size: 14px; font-weight: 600; color: #444; display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .sidebar-menu li:hover { background: #f0f4f9; color: #1976d2; }
 
+        /* Modals & Popups */
         .modal-screen { display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; }
         .record-card { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9fbfd; border-radius: 8px; margin-bottom: 8px; font-size: 13px; border-left: 4px solid #1976d2; }
-        .receipt-btn { background: #6c757d; font-size: 10px; padding: 4px 8px; width: auto; margin: 0; }
+        .receipt-btn { background: #6c757d; font-size: 11px; padding: 5px 10px; width: auto; margin: 0; }
+        
+        /* Receipt Popup Modal */
+        .receipt-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; display: none; justify-content: center; align-items: center; }
+        .receipt-box { background: white; width: 90%; max-width: 340px; padding: 20px; border-radius: 12px; text-align: center; }
+        .receipt-title { font-size: 18px; font-weight: bold; color: #1976d2; margin-bottom: 15px; }
+        .receipt-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed #ddd; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
 
+    <!-- Sidebar Overlay & Menu -->
     <div id="overlay" class="sidebar-overlay"></div>
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
@@ -63,9 +77,21 @@
             <p id="sideEmail" style="font-size: 12px; opacity: 0.8;">user@email.com</p>
         </div>
         <ul class="sidebar-menu">
-            <li id="menuSecBtn"><i class="fa-solid fa-shield-halved" style="color:#1976d2;"></i> Security (Reset PIN)</li>
+            <li id="menuSecBtn"><i class="fa-solid fa-shield-halved" style="color:#1976d2;"></i> Change PIN (Email OTP)</li>
             <li id="menuLogout" style="color: #d32f2f;"><i class="fa-solid fa-right-from-bracket" style="color:#d32f2f;"></i> Log Out</li>
         </ul>
+    </div>
+
+    <!-- Receipt Modal Popup -->
+    <div id="receiptModal" class="receipt-modal-overlay">
+        <div class="receipt-box">
+            <div class="receipt-title">PAYTAKE RECEIPT 🧾</div>
+            <div class="receipt-row"><span>Type:</span><strong id="rType">-</strong></div>
+            <div class="receipt-row"><span>Amount:</span><strong id="rAmount">-</strong></div>
+            <div class="receipt-row"><span>Time:</span><strong id="rTime">-</strong></div>
+            <div class="receipt-row"><span>Status:</span><strong style="color:green;">SUCCESSFUL</strong></div>
+            <button id="closeReceiptBtn" style="margin-top: 15px; background: #333;">Close Receipt</button>
+        </div>
     </div>
 
     <!-- Auth Screen -->
@@ -80,6 +106,7 @@
             <span id="regTab" class="tab">Register</span>
         </div>
 
+        <!-- Login Form -->
         <div id="loginForm">
             <label style="font-size: 12px; font-weight: bold;">Phone Number</label>
             <input type="text" id="loginPhone" placeholder="078XXXXXXX">
@@ -90,6 +117,7 @@
             <button id="loginBtn">Log In</button>
         </div>
 
+        <!-- Full Self-Registration Form -->
         <div id="registerForm" style="display: none;">
             <label style="font-size: 12px; font-weight: bold;">Full Name</label>
             <input type="text" id="regName" placeholder="Jean Damour">
@@ -107,23 +135,29 @@
         </div>
     </div>
 
-    <!-- Main Dashboard -->
+    <!-- Main Dashboard Screen -->
     <div id="dashboardScreen" style="display: none;">
         
+        <!-- Top Bar Navigation Header -->
         <div class="top-bar">
             <i class="fa-solid fa-bars icon-btn" id="openMenuBtn"></i>
             <span class="brand-title">PAYTAKE</span>
-            <i class="fa-solid fa-user-circle icon-btn"></i>
+            <i class="fa-solid fa-user-circle icon-btn" id="openProfileBtn"></i>
         </div>
 
         <div class="dashboard-body">
             
+            <!-- Modern Balance Card with Eye Toggle -->
             <div class="balance-card">
-                <div class="balance-title">Total Balance</div>
+                <div class="balance-header">
+                    <span class="balance-title">Total Balance</span>
+                    <i class="fa-solid fa-eye icon-btn" id="toggleBalanceEye" style="font-size: 16px;"></i>
+                </div>
                 <div class="balance-val" id="clientBalance">0 RWF</div>
                 <div class="acc-info">Account: <span id="accNoDisplay">-</span></div>
             </div>
 
+            <!-- Services Grid -->
             <div class="section-label">Services</div>
             <div class="services-grid">
                 <div class="service-item" id="btnSendService">
@@ -144,7 +178,7 @@
                 </div>
             </div>
 
-            <!-- Modals -->
+            <!-- Service Action Modals -->
             <div id="sendModal" class="modal-screen">
                 <div class="section-label">💸 Send Money</div>
                 <input type="text" id="receiverPhone" placeholder="Recipient Phone Number">
@@ -182,15 +216,16 @@
             </div>
 
             <div id="securityModal" class="modal-screen">
-                <div class="section-label">🔑 Security (Reset PIN Code)</div>
-                <button id="sendCodeBtn" style="background: #6c757d;">Send Verification OTP to Email</button>
-                <div id="otpBox" style="display:none;">
+                <div class="section-label">🔑 Change PIN (Email Verification)</div>
+                <button id="sendCodeBtn" style="background: #6c757d;">1. Send Verification OTP Code</button>
+                <div id="otpBox" style="display:none; margin-top: 10px;">
                     <input type="text" id="inputOtp" placeholder="Enter Email Verification Code">
                     <input type="password" id="newPinCode" maxlength="4" placeholder="New 4-Digit PIN">
-                    <button id="confirmPinBtn" style="background: #28a745;">Confirm New PIN</button>
+                    <button id="confirmPinBtn" style="background: #28a745;">2. Confirm New PIN</button>
                 </div>
             </div>
 
+            <!-- Recent Transactions List -->
             <div class="section-label">Recent Transactions</div>
             <div id="recordsList">
                 <p style="color: #777; font-size: 12px; text-align: center;">No activity yet...</p>
@@ -221,7 +256,10 @@
     let unsubscribe = null;
     let currentUser = null;
     let generatedOtp = null;
+    let isBalanceHidden = false;
+    let rawBalance = 0;
 
+    // Menu Drawer UI Logic
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("overlay");
 
@@ -235,6 +273,22 @@
         overlay.style.display = "none";
     });
 
+    // Toggle Eye for Balance
+    document.getElementById("toggleBalanceEye").addEventListener("click", () => {
+        isBalanceHidden = !isBalanceHidden;
+        const balElement = document.getElementById("clientBalance");
+        const eyeIcon = document.getElementById("toggleBalanceEye");
+
+        if (isBalanceHidden) {
+            balElement.innerText = "•••••• RWF";
+            eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            balElement.innerText = rawBalance.toLocaleString() + " RWF";
+            eyeIcon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    });
+
+    // Auth Screen Tabs
     const loginTab = document.getElementById("loginTab");
     const regTab = document.getElementById("regTab");
 
@@ -252,6 +306,7 @@
         document.getElementById("loginForm").style.display = "none";
     });
 
+    // Registration Action
     document.getElementById("registerBtn").addEventListener("click", async () => {
         const name = document.getElementById("regName").value.trim();
         const email = document.getElementById("regEmail").value.trim();
@@ -259,7 +314,7 @@
         const pin = document.getElementById("regPin").value.trim();
 
         if (!name || !email || !phone || pin.length !== 4) {
-            alert("Fill in all details correctly!");
+            alert("Please fill in all details correctly!");
             return;
         }
 
@@ -276,18 +331,19 @@
                 balance: 0,
                 history: []
             });
-            alert("Account created successfully!");
+            alert("Account created successfully! Please sign in.");
             loginTab.click();
             document.getElementById("loginPhone").value = phone;
         }
     });
 
+    // Login Action
     document.getElementById("loginBtn").addEventListener("click", async () => {
         const phone = document.getElementById("loginPhone").value.trim();
         const pin = document.getElementById("loginPin").value.trim();
 
         if (!phone || !pin) {
-            alert("Enter both phone number and PIN!");
+            alert("Please enter both phone number and PIN!");
             return;
         }
 
@@ -309,8 +365,11 @@
                 unsubscribe = onSnapshot(userRef, (snapshot) => {
                     if (snapshot.exists()) {
                         const updated = snapshot.data();
-                        currentUser.balance = updated.balance;
-                        document.getElementById("clientBalance").innerText = (updated.balance || 0).toLocaleString() + " RWF";
+                        rawBalance = updated.balance || 0;
+                        
+                        if (!isBalanceHidden) {
+                            document.getElementById("clientBalance").innerText = rawBalance.toLocaleString() + " RWF";
+                        }
                         
                         if (updated.history && updated.history.length > 0) {
                             let html = "";
@@ -323,69 +382,8 @@
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="color:${isPos ? 'green' : 'red'}; font-weight:bold;">${isPos ? '+' : ''}${rec.amount.toLocaleString()} RWF</div>
-                                        <button class="receipt-btn" onclick="alert('PAYTAKE RECEIPT\\nType: ${rec.type}\\nAmount: ${rec.amount} RWF\\nTime: ${rec.time}')">Receipt</button>
+                                        <button class="receipt-btn" onclick="openReceipt('${rec.type}', '${rec.amount}', '${rec.time}')">Receipt</button>
                                     </div>
                                 </div>`;
                             });
-                            document.getElementById("recordsList").innerHTML = html;
-                        } else {
-                            document.getElementById("recordsList").innerHTML = '<p style="color: #777; font-size: 12px; text-align: center;">No activity yet...</p>';
-                        }
-                    }
-                });
-            } else {
-                alert("Incorrect PIN!");
-            }
-        } else {
-            alert("Account not found!");
-        }
-    });
-
-    function hideModals() {
-        document.querySelectorAll('.modal-screen').forEach(m => m.style.display = 'none');
-    }
-
-    document.getElementById("btnSendService").addEventListener("click", () => { hideModals(); document.getElementById("sendModal").style.display = "block"; });
-    document.getElementById("btnWithdrawService").addEventListener("click", () => { hideModals(); document.getElementById("withdrawModal").style.display = "block"; });
-    document.getElementById("btnAirtimeService").addEventListener("click", () => { hideModals(); document.getElementById("airtimeModal").style.display = "block"; });
-    document.getElementById("btnPayBillsService").addEventListener("click", () => { hideModals(); document.getElementById("billsModal").style.display = "block"; });
-    document.getElementById("menuSecBtn").addEventListener("click", () => { sidebar.classList.remove("active"); overlay.style.display = "none"; hideModals(); document.getElementById("securityModal").style.display = "block"; });
-
-    document.getElementById("sendMoneyBtn").addEventListener("click", async () => {
-        const targetPhone = document.getElementById("receiverPhone").value.trim();
-        const amount = parseFloat(document.getElementById("sendAmount").value);
-
-        if (!targetPhone || isNaN(amount) || amount <= 0 || (currentUser.balance || 0) < amount) {
-            alert("Invalid transfer details or insufficient balance!");
-            return;
-        }
-
-        const receiverRef = doc(db, "accounts", targetPhone);
-        const receiverDoc = await getDoc(receiverRef);
-
-        if (!receiverDoc.exists()) {
-            alert("Recipient account does not exist!");
-            return;
-        }
-
-        const timeNow = new Date().toLocaleTimeString();
-
-        await updateDoc(doc(db, "accounts", currentUser.phone), {
-            balance: currentUser.balance - amount,
-            history: arrayUnion({ type: "Sent to " + targetPhone, amount: -amount, time: timeNow })
-        });
-
-        await updateDoc(receiverRef, {
-            balance: (receiverDoc.data().balance || 0) + amount,
-            history: arrayUnion({ type: "Received from " + currentUser.phone, amount: amount, time: timeNow })
-        });
-
-        alert("Transferred " + amount + " RWF successfully!");
-        hideModals();
-    });
-
-    document.getElementById("withdrawBtn").addEventListener("click", async () => {
-        const amount = parseFloat(document.getElementById("withdrawAmount").value);
-        if (isNaN(amount) || amount <= 0 || (currentUser.balance || 0) < amount) {
-            alert("Invalid withdrawal amount or insufficient balance!");
-     
+                            document.getElementById("recordsList").innerHT
