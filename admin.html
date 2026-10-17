@@ -6,35 +6,63 @@
     <title>PAYTAKE - Server Admin Portal</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #121212; color: white; padding: 20px; display: flex; justify-content: center; }
-        .card { background: #1e1e1e; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 10px; margin: 6px 0 14px 0; border-radius: 6px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
-        .req-box { background: #2a2a2a; border-left: 4px solid #ff9800; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-approve { background: #28a745; padding: 6px 12px; width: auto; font-size: 12px; margin: 0; }
+        .card { background: #1e1e1e; padding: 22px; border-radius: 14px; width: 100%; max-width: 500px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+        
+        .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .analytic-box { background: #2a2a2a; padding: 14px; border-radius: 10px; border-left: 4px solid #1976d2; }
+        .analytic-title { font-size: 11px; opacity: 0.7; text-transform: uppercase; }
+        .analytic-val { font-size: 18px; font-weight: bold; margin-top: 4px; color: #fff; }
+
+        input { width: 100%; padding: 12px; margin: 6px 0 14px 0; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 13px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 8px; font-size: 14px; }
+        
+        .user-box { background: #2a2a2a; border-left: 4px solid #1976d2; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .user-box:hover { background: #333; }
+        
+        .req-box { background: #2a2a2a; border-left: 4px solid #ff9800; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-approve { background: #28a745; padding: 7px 12px; width: auto; font-size: 12px; margin: 0; }
+        .btn-select { background: #007bff; padding: 5px 10px; width: auto; font-size: 11px; margin: 0; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>PAYTAKE Admin Server Portal ⚙️</h2>
+    <h2 style="color:#1976d2; margin-bottom: 15px;">PAYTAKE Admin Server ⚙️</h2>
     
-    <label>Target Account Phone Number:</label>
-    <input type="text" id="targetAcc" placeholder="078XXXXXXX">
+    <!-- Analytics -->
+    <div class="analytics-grid">
+        <div class="analytic-box">
+            <div class="analytic-title">Total Users</div>
+            <div class="analytic-val" id="totalUsersCount">0</div>
+        </div>
+        <div class="analytic-box" style="border-color:#28a745;">
+            <div class="analytic-title">System Circulation</div>
+            <div class="analytic-val" id="totalSystemBal">0 RWF</div>
+        </div>
+    </div>
 
-    <label>Top-Up Amount (RWF):</label>
-    <input type="number" id="addAmount" placeholder="Amount to add...">
+    <label style="font-size: 12px; font-weight: bold;">Target Account Phone Number:</label>
+    <input type="text" id="targetAcc" placeholder="e.g. +25078XXXXXXX">
+
+    <label style="font-size: 12px; font-weight: bold;">Top-Up Amount (RWF):</label>
+    <input type="number" id="addAmount" placeholder="Amount to credit balance...">
 
     <button id="updateBtn">Credit Account Balance</button>
 
-    <h3 style="margin: 20px 0 10px 0; font-size: 16px; color: #ff9800;">Pending Withdrawal Requests</h3>
+    <h3 style="margin: 20px 0 10px 0; font-size: 15px; color: #ff9800;">1. Pending Withdrawal Requests</h3>
     <div id="pendingList">
         <p style="color: #888; font-size: 12px;">No pending requests...</p>
+    </div>
+
+    <h3 style="margin: 25px 0 10px 0; font-size: 15px; color: #1976d2;">2. Registered Users Directory</h3>
+    <div id="usersDirectory">
+        <p style="color: #888; font-size: 12px;">Loading registered accounts...</p>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, onSnapshot, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDQ2-iY9iFHriHJ_hMQkMe3Jn",
@@ -48,7 +76,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    document.getElementById("updateBtn").addEventListener("click", async () => {
+    // Credit Balance
+    document.getElementById("updateBtn").onclick = async () => {
         const phone = document.getElementById("targetAcc").value.trim();
         const amount = parseFloat(document.getElementById("addAmount").value) || 0;
 
@@ -75,9 +104,9 @@
 
         alert("Successfully credited " + amount + " RWF to " + phone);
         document.getElementById("addAmount").value = "";
-    });
+    };
 
-    // Realtime Pending Requests Listener
+    // Pending Withdrawals
     onSnapshot(collection(db, "pending_withdrawals"), (snapshot) => {
         if (!snapshot.empty) {
             let html = "";
@@ -96,6 +125,41 @@
             document.getElementById("pendingList").innerHTML = '<p style="color: #888; font-size: 12px;">No pending requests...</p>';
         }
     });
+
+    // Accounts List & System Analytics
+    onSnapshot(collection(db, "accounts"), (snapshot) => {
+        if (!snapshot.empty) {
+            let html = "";
+            let totalUsers = 0;
+            let totalBal = 0;
+
+            snapshot.forEach((userDoc) => {
+                totalUsers++;
+                const u = userDoc.data();
+                const bal = u.balance || 0;
+                totalBal += bal;
+
+                html += `<div class="user-box" onclick="selectUser('${userDoc.id}')">
+                    <div>
+                        <strong>${u.fullName || 'User'}</strong><br>
+                        <small style="color:#aaa;">${userDoc.id} | ${u.email || ''}</small><br>
+                        <small style="color:#28a745; font-weight:bold;">Balance: ${bal.toLocaleString()} RWF</small>
+                    </div>
+                    <button class="btn-select">Select</button>
+                </div>`;
+            });
+
+            document.getElementById("totalUsersCount").innerText = totalUsers;
+            document.getElementById("totalSystemBal").innerText = totalBal.toLocaleString() + " RWF";
+            document.getElementById("usersDirectory").innerHTML = html;
+        } else {
+            document.getElementById("usersDirectory").innerHTML = '<p style="color: #888; font-size: 12px;">No registered accounts yet...</p>';
+        }
+    });
+
+    window.selectUser = (phone) => {
+        document.getElementById("targetAcc").value = phone;
+    };
 
     window.approveWithdraw = async (reqId, phone, amount) => {
         const userRef = doc(db, "accounts", phone);
